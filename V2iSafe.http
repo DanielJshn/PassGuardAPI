@@ -1,0 +1,6 @@
+@V2iSafe_HostAddress = http://localhost:5115
+
+GET {{V2iSafe_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

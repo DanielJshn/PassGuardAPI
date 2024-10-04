@@ -21,7 +21,7 @@ namespace apief
             string token;
             try
             {
-                // await _authService.ValidateRegistrationDataAsync(userForRegistration);
+                await _authService.ValidateRegistrationDataAsync(userForRegistration);
                 await _authService.CheckUserExistsAsync(userForRegistration);
                 token = await _authService.GenerateTokenAsync(userForRegistration);
             }
@@ -31,5 +31,27 @@ namespace apief
             }
             return Ok(new ApiResponse(success: true, data: new { Token = token }));
         }
+
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(userForRegistration userForLogin)
+        {
+            string newToken;
+            try
+            {
+                await _authService.CheckEmailAsync(userForLogin);
+                await _authService.CheckPasswordAsync(userForLogin);
+                newToken = await _authService.GenerateTokenForLogin(userForLogin);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(success: false, message: ex.Message));
+            }
+
+            return Ok(new ApiResponse(success: true, data: new { Token = newToken }));
+        }
+
+        
     }
 }

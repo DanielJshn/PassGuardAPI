@@ -42,27 +42,9 @@ namespace apief
 
 
 
-        public async Task<string> GenerateTokenAsync(userForRegistration userForRegistration)
-        {
 
-            _logger.LogInfo("Generating token for user: {Email}", userForRegistration.email);
-            string passwordHash2 = _authHelp.GetPasswordHash(userForRegistration.password);
-            string token = _authHelp.GenerateNewToken(userForRegistration.email);
 
-            var tokenEntity = new User
-            {
-                id = Guid.NewGuid(),
-                email = userForRegistration.email,
-                passwordHash = passwordHash2,
-            };
 
-            await _authRepository.AddUserAsync(tokenEntity);
-            _logger.LogInfo("Token generated for user: {Email}", userForRegistration.email);
-
-            return token;
-        }
-
-        
         public async Task CheckEmailAsync(userForRegistration userForLogin)
         {
             _logger.LogInfo("Checking if email exists for login: {Email}", userForLogin.email);
@@ -76,25 +58,6 @@ namespace apief
         }
 
 
-        public async Task CheckPasswordAsync(userForRegistration userForLogin)
-        {
-            _logger.LogInfo("Checking password for user: {Email}", userForLogin.email);
-            User? user = await _authRepository.GetUserByEmailAsync(userForLogin.email);
-
-            if (user == null)
-            {
-                _logger.LogWarning("User not found: {Email}", userForLogin.email);
-                throw new Exception("User not found");
-            }
-
-            string inputPasswordHash = _authHelp.GetPasswordHash(userForLogin.password);
-
-            if (!inputPasswordHash.Equals(user.passwordHash))
-            {
-                _logger.LogWarning("Incorrect password for user: {Email}", userForLogin.email);
-                throw new Exception("Incorrect Password");
-            }
-        }
 
 
         public Task ValidateRegistrationDataAsync(userForRegistration userForRegistration)
@@ -128,25 +91,61 @@ namespace apief
         }
 
 
-        public Task CheckNameAsync(userForRegistration userForLogin)
+        public async Task CheckPasswordAsync(userForRegistration userForLogin)
         {
-            throw new NotImplementedException();
+            _logger.LogInfo("Checking password for user: {Email}", userForLogin.email);
+            User? user = await _authRepository.GetUserByEmailAsync(userForLogin.email);
+
+            if (user == null)
+            {
+                _logger.LogWarning("User not found: {Email}", userForLogin.email);
+                throw new Exception("User not found");
+            }
+
+            string inputPasswordHash = _authHelp.GetPasswordHash(userForLogin.password);
+
+            if (!inputPasswordHash.Equals(user.passwordHash))
+            {
+                _logger.LogWarning("Incorrect password for user: {Email}", userForLogin.email);
+                throw new Exception("Incorrect Password");
+            }
         }
 
-        public Task CheckEmailOrNameAsync(userForRegistration userForLogin)
+        public async Task<string> GenerateTokenAsync(userForRegistration userForRegistration)
         {
-            throw new NotImplementedException();
+
+            _logger.LogInfo("Generating token for user: {Email}", userForRegistration.email);
+            string passwordHash2 = _authHelp.GetPasswordHash(userForRegistration.password);
+            string token = _authHelp.GenerateNewToken(userForRegistration.email);
+
+            var tokenEntity = new User
+            {
+                id = Guid.NewGuid(),
+                email = userForRegistration.email,
+                passwordHash = passwordHash2,
+            };
+
+            await _authRepository.AddUserAsync(tokenEntity);
+            _logger.LogInfo("Token generated for user: {Email}", userForRegistration.email);
+
+            return token;
         }
 
-        public Task<string> GenerateTokenForLogin(userForRegistration userAuthDto)
-        {
-            throw new NotImplementedException();
-        }
 
-        public Task CheckUserNameAsync(userForRegistration userForLogin)
+        public async Task<string> GenerateTokenForLogin(userForRegistration userAuthDto)
         {
-            throw new NotImplementedException();
+            _logger.LogInfo("Generating token for login: {Email}", userAuthDto.email);
+            string email = userAuthDto.email;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                _logger.LogWarning("User not found with this email not found", userAuthDto.email);
+                throw new Exception("User not found");
+            }
+
+            string token = _authHelp.GenerateNewToken(email);
+            _logger.LogInfo("Token generated for login: {Email}", email);
+            return token;
         }
     }
-
 }

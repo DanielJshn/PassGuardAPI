@@ -1,26 +1,24 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace apief
+
+namespace apief.Services
 {
     public class PassService : IPassService
     {
-        public Task DeletePasswordAsync(Guid id)
+        private readonly IPassRepository _passwordRepository;
+
+        public PassService(IPassRepository passwordRepository)
         {
-            throw new NotImplementedException();
+            _passwordRepository = passwordRepository;
         }
 
-        public Task<List<Password>> GetAllPasswordsAsync(int userId)
+         public async Task<Password> CreateAsync(Password password)
         {
-            throw new NotImplementedException();
+            return await _passwordRepository.AddAsync(password);
         }
 
-        public Task<Password> PostPasswordAsync(int userId, Password passwordInput)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Password> UpdatePasswordAsync(Guid id, Password userInput)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }

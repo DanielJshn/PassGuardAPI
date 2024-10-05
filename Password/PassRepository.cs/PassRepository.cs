@@ -1,26 +1,24 @@
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace apief
 {
     public class PassRepository : IPassRepository
     {
-        public Task DeletePassword(Guid id)
+        private readonly DataContext _context;
+
+        public PassRepository(DataContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
         }
 
-        public Task<List<Password>> GetAllPasswords(int userId)
+        public async Task<Password> AddAsync(Password password)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<Password> PostPassword(int userId, Password passwordInput)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Password> UpdatePassword(Guid id, Password userInput)
-        {
-            throw new NotImplementedException();
+            await _context.Passwords.AddAsync(password);
+            await _context.SaveChangesAsync();
+            return password;
         }
     }
 }

@@ -36,7 +36,7 @@ namespace V2iSafe.Migrations
                 columns: table => new
                 {
                     passwordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     password = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     organization = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     title = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -66,18 +66,17 @@ namespace V2iSafe.Migrations
                 schema: "Dbo",
                 columns: table => new
                 {
-                    passwordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     additionalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    passwordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     title = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    value = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    passwordId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    value = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AdditionalFields", x => x.passwordId);
+                    table.PrimaryKey("PK_AdditionalFields", x => x.additionalId);
                     table.ForeignKey(
-                        name: "FK_AdditionalFields_Password_passwordId1",
-                        column: x => x.passwordId1,
+                        name: "FK_AdditionalFields_Password_passwordId",
+                        column: x => x.passwordId,
                         principalSchema: "Dbo",
                         principalTable: "Password",
                         principalColumn: "passwordId",
@@ -85,10 +84,10 @@ namespace V2iSafe.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AdditionalFields_passwordId1",
+                name: "IX_AdditionalFields_passwordId",
                 schema: "Dbo",
                 table: "AdditionalFields",
-                column: "passwordId1");
+                column: "passwordId");
         }
 
         /// <inheritdoc />

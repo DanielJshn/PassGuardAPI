@@ -12,7 +12,7 @@ using apief;
 namespace V2iSafe.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241005100312_InitialCreate")]
+    [Migration("20241005104443_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,14 +28,11 @@ namespace V2iSafe.Migrations
 
             modelBuilder.Entity("apief.AdditionalField", b =>
                 {
-                    b.Property<Guid>("passwordId")
+                    b.Property<Guid>("additionalId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("additionalId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("passwordId1")
+                    b.Property<Guid>("passwordId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("title")
@@ -44,9 +41,9 @@ namespace V2iSafe.Migrations
                     b.Property<string>("value")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("passwordId");
+                    b.HasKey("additionalId");
 
-                    b.HasIndex("passwordId1");
+                    b.HasIndex("passwordId");
 
                     b.ToTable("AdditionalFields", "Dbo");
                 });
@@ -76,11 +73,11 @@ namespace V2iSafe.Migrations
 
             modelBuilder.Entity("apief.Password", b =>
                 {
-                    b.Property<Guid?>("passwordId")
+                    b.Property<Guid>("passwordId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("id")
+                    b.Property<Guid>("id")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("lastEdit")
@@ -121,13 +118,11 @@ namespace V2iSafe.Migrations
 
             modelBuilder.Entity("apief.AdditionalField", b =>
                 {
-                    b.HasOne("apief.Password", "Password")
+                    b.HasOne("apief.Password", null)
                         .WithMany("additionalFields")
-                        .HasForeignKey("passwordId1")
+                        .HasForeignKey("passwordId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Password");
                 });
 
             modelBuilder.Entity("apief.Password", b =>

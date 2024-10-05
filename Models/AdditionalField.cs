@@ -6,7 +6,7 @@ namespace apief
         public Guid additionalId { get; set; } = Guid.NewGuid();
         public string? title { get; set; }
         public string? value { get; set; }
-        public Password Password { get; set; }
+        
 
     }
 }

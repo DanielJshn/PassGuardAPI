@@ -38,17 +38,17 @@ namespace apief
                 .HasKey(n => n.noteId);
 
             modelBuilder.Entity<Password>()
-                .ToTable("Password", "Dbo")
-                .HasKey(p => p.id); // Убедитесь, что у вас есть свойство Id
+         .ToTable("Password", "Dbo")
+         .HasKey(p => p.passwordId); // Убедитесь, что PasswordId — это основной ключ
 
             modelBuilder.Entity<AdditionalField>()
                 .ToTable("AdditionalFields", "Dbo")
-                .HasKey(a => a.additionalId); // Убедитесь, что у вас есть свойство AdditionalId
+                .HasKey(a => a.additionalId); // Убедитесь, что AdditionalId — это основной ключ
 
             // Настройка связи один ко многим с каскадным удалением
             modelBuilder.Entity<Password>()
                 .HasMany(p => p.additionalFields)
-                .WithOne(a => a.Password)
+                .WithOne()
                 .HasForeignKey(a => a.passwordId) // Указывает, что PasswordId в AdditionalField является внешним ключом
                 .OnDelete(DeleteBehavior.Cascade); // Устанавливает каскадное удаление
         }

@@ -30,23 +30,27 @@ namespace apief
             modelBuilder.HasDefaultSchema("Dbo");
 
             modelBuilder.Entity<User>()
-            .ToTable("User", "Dbo")
-               .HasKey(u => u.id);
+                .ToTable("User", "Dbo")
+                .HasKey(u => u.id);
 
             modelBuilder.Entity<Note>()
-             .ToTable("Note", "Dbo")
-                .HasKey(u => u.noteId);
+                .ToTable("Note", "Dbo")
+                .HasKey(n => n.noteId);
 
             modelBuilder.Entity<Password>()
-            .ToTable("Password", "Dbo")
-            .HasKey(u => u.passwordId);
+         .ToTable("Password", "Dbo")
+         .HasKey(p => p.passwordId); // Убедитесь, что PasswordId — это основной ключ
 
-             modelBuilder.Entity<AdditionalField>()
-            .ToTable("AdditionalFields", "Dbo")
-            .HasKey(u => u.passwordId);
+            modelBuilder.Entity<AdditionalField>()
+                .ToTable("AdditionalFields", "Dbo")
+                .HasKey(a => a.additionalId); // Убедитесь, что AdditionalId — это основной ключ
 
-
-
+            // Настройка связи один ко многим с каскадным удалением
+            modelBuilder.Entity<Password>()
+                .HasMany(p => p.additionalFields)
+                .WithOne()
+                .HasForeignKey(a => a.passwordId) // Указывает, что PasswordId в AdditionalField является внешним ключом
+                .OnDelete(DeleteBehavior.Cascade); // Устанавливает каскадное удаление
         }
     }
 }

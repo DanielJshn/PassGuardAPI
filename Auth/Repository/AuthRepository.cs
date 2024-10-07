@@ -12,10 +12,11 @@ namespace testProd.auth
             _dataContext = dataContext;
         }
 
-        public async Task<User> GetUserByEmailAsync(string email)
+        public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await _dataContext.Users.FirstOrDefaultAsync(u => u.email == email);
         }
+
 
         public async Task AddUserAsync(User user)
         {

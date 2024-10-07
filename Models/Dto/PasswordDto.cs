@@ -1,14 +1,14 @@
 namespace apief
 {
-    public class Password
+    public class PasswordDto
     {
-        public Guid id { get; set; } = Guid.NewGuid();
         public Guid passwordId { get; set; } = Guid.NewGuid();
         public string? password { get; set; }
         public string? organization { get; set; }
         public string? title { get; set; }
         public string? lastEdit { get; set; } = null;
-        public List<AdditionalField> additionalFields { get; set; } = new List<AdditionalField>(); 
+        public List<AdditionalFieldDto>? additionalFields { get; set; } = new List<AdditionalFieldDto>();
     }
 
+    
 }

@@ -14,14 +14,17 @@ namespace apief
             _passwordService = passwordService;
         }
         [HttpPost]
-        public async Task<ActionResult<Password>> PostPassword([FromBody] Password password)
+        public async Task<ActionResult<PasswordDto>> PostPassword([FromBody] PasswordDto password)
         {
             if (password == null)
             {
                 return BadRequest("Password data is null.");
             }
 
-            var createdPassword = await _passwordService.CreateAsync(password);
+            var identity = await _passwordService.GetUserByTokenAsync(User);
+            var userId = identity.id;
+            var createdPassword = await _passwordService.CreateAsync(password, userId);
+
             return CreatedAtAction(nameof(PostPassword), new { id = createdPassword.passwordId }, createdPassword);
         }
     }

@@ -132,14 +132,14 @@ namespace apief
         }
 
 
-        public async Task<string> GenerateTokenForLogin(userForRegistration userAuthDto)
+        public string GenerateTokenForLogin(userForRegistration userAuthDto)
         {
             _logger.LogInfo("Generating token for login: {Email}", userAuthDto.email);
             string email = userAuthDto.email;
 
             if (string.IsNullOrEmpty(email))
             {
-                _logger.LogWarning("User not found with this email not found", userAuthDto.email);
+                _logger.LogWarning("User not found with this email", userAuthDto.email);
                 throw new Exception("User not found");
             }
 
@@ -147,5 +147,6 @@ namespace apief
             _logger.LogInfo("Token generated for login: {Email}", email);
             return token;
         }
+
     }
 }

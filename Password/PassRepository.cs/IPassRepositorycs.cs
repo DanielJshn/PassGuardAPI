@@ -2,6 +2,8 @@ namespace apief
 {
     public interface IPassRepository
     {
-        Task<Password> AddAsync(Password password);
+        Task AddAsync(Password password);
+        Task<List<Password>> GetAllPasswordsByUserIdAsync(Guid userId);
+        
     }
 }

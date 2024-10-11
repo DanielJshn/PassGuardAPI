@@ -7,6 +7,5 @@ namespace apief
         public string? title { get; set; }
         public string? value { get; set; }
         
-
     }
 }

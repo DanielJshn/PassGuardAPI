@@ -13,16 +13,41 @@ namespace apief
         {
             _passwordService = passwordService;
         }
-        [HttpPost]
-        public async Task<ActionResult<Password>> PostPassword([FromBody] Password password)
-        {
-            if (password == null)
-            {
-                return BadRequest("Password data is null.");
-            }
 
-            var createdPassword = await _passwordService.CreateAsync(password);
-            return CreatedAtAction(nameof(PostPassword), new { id = createdPassword.passwordId }, createdPassword);
+
+        [HttpPost]
+        public async Task<ActionResult<PasswordDto>> PostPassword([FromBody] PasswordDto password)
+        {
+            try
+            {
+                if (password == null)
+                {
+                    return BadRequest("Password data is null.");
+                }
+                var identity = await _passwordService.GetUserByTokenAsync(User);
+                var createdPassword = await _passwordService.CreateAsync(password, identity.id);
+                return Ok(new ApiResponse(success: true, data: createdPassword));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(success: false, message: ex.Message));
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetPasswords()
+        {
+            try
+            {
+                var identity = await _passwordService.GetUserByTokenAsync(User);
+                List<Password> getPassword = await _passwordService.GetAllPasswordsForUserAsync(identity.id);
+                return Ok(new ApiResponse(success: true, data: getPassword));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(success: false, message: ex.Message));
+            }
         }
     }
 }

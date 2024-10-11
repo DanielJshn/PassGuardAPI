@@ -6,7 +6,7 @@ namespace apief
         public string? Message { get; set; }
         public object? Data { get; set; }
 
-        public ApiResponse(bool success, string message = null, object data = null)
+        public ApiResponse(bool success, string? message = null, object? data = null)
         {
             Success = success;
             Message = message;

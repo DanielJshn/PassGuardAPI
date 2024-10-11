@@ -7,6 +7,6 @@ namespace apief
         Task<string> GenerateTokenAsync(userForRegistration userForRegistration);
         Task CheckPasswordAsync(userForRegistration userForLogin);
         Task ValidateRegistrationDataAsync(userForRegistration userForRegistration);
-        public string GenerateTokenForLogin(userForRegistration userAuthDto);
+        Task<string> GenerateTokenForLogin(userForRegistration userAuthDto);
     }
 }

@@ -9,7 +9,7 @@ namespace apief
     public class PassRepository : IPassRepository
     {
         private readonly DataContext _context;
-        
+
 
         public PassRepository(DataContext context)
         {
@@ -20,7 +20,16 @@ namespace apief
         {
             await _context.Passwords.AddAsync(password);
             await _context.SaveChangesAsync();
-            
+
+        }
+
+        
+        public async Task<List<Password>> GetAllPasswordsByUserIdAsync(Guid userId)
+        {
+            return await _context.Passwords
+                .Where(p => p.id == userId)
+                .Include(p => p.additionalFields) 
+                .ToListAsync();
         }
     }
 }

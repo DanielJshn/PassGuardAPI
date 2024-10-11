@@ -6,8 +6,8 @@ namespace apief
     {
         public MappingProfile()
         {
-            CreateMap<Password, PasswordDto>();
-            CreateMap<AdditionalField, AdditionalFieldDto>();
+            CreateMap<Password, PasswordDto>().ReverseMap();
+            CreateMap<AdditionalField, AdditionalFieldDto>().ReverseMap();
         }
     }
 }

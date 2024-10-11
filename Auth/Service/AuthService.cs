@@ -132,7 +132,7 @@ namespace apief
         }
 
 
-        public string GenerateTokenForLogin(userForRegistration userAuthDto)
+        public Task<string> GenerateTokenForLogin(userForRegistration userAuthDto)
         {
             _logger.LogInfo("Generating token for login: {Email}", userAuthDto.email);
             string email = userAuthDto.email;
@@ -145,7 +145,7 @@ namespace apief
 
             string token = _authHelp.GenerateNewToken(email);
             _logger.LogInfo("Token generated for login: {Email}", email);
-            return token;
+            return Task.FromResult(token);
         }
 
     }

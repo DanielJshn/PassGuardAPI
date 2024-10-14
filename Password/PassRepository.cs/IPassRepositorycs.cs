@@ -7,5 +7,6 @@ namespace apief
         Task<Password?> GetOnePasswordAsync(Guid userId, Guid passwordId);
         Task RemoveAdditionalFieldsAsync(List<AdditionalField> fieldsToRemove);
         Task AddAdditionalFieldAsync(AdditionalField field);
+        Task DeletePasswordDataAsync(Guid passwordId);
     }
 }

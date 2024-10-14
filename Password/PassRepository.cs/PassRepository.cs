@@ -54,6 +54,16 @@ namespace apief
         }
 
 
-        
+        public async Task DeletePasswordDataAsync(Guid passwordId)
+        {
+            var password = await _context.Passwords
+        .FirstOrDefaultAsync(p => p.passwordId == passwordId);
+
+            if (password != null)
+            {
+                _context.Passwords.Remove(password);
+                await _context.SaveChangesAsync(); 
+            }
+        }
     }
 }

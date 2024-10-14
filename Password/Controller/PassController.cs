@@ -41,12 +41,28 @@ namespace apief
             try
             {
                 var identity = await _passwordService.GetUserByTokenAsync(User);
-                List<Password> getPassword = await _passwordService.GetAllPasswordsForUserAsync(identity.id);
+                List<PasswordResponsDto> getPassword = await _passwordService.GetAllPasswordsForUserAsync(identity.id);
                 return Ok(new ApiResponse(success: true, data: getPassword));
             }
             catch (Exception ex)
             {
                 return BadRequest(new ApiResponse(success: false, message: ex.Message));
+            }
+        }
+
+
+        [HttpPut("{passwordId}")]
+        public async Task<ActionResult<PasswordDto>> UpdatePassword(Guid passwordId, [FromBody] PasswordDto dataInput)
+        {
+            try
+            {
+                var identity = await _passwordService.GetUserByTokenAsync(User);
+                PasswordDto updatedPassword = await _passwordService.UpdatePassword(identity.id, passwordId, dataInput);
+                return Ok(updatedPassword);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace apief.Services
@@ -13,13 +14,15 @@ namespace apief.Services
         private readonly IAuthRepository _authRepository;
         private readonly IMapper _mapper;
         private readonly ILog _logger;
+        DataContext _dataContext;
 
-        public PassService(IPassRepository passwordRepository, IAuthRepository authRepository, IMapper mapper, ILog logger)
+        public PassService(IPassRepository passwordRepository, IAuthRepository authRepository, IMapper mapper, ILog logger, DataContext dataContext)
         {
             _passwordRepository = passwordRepository;
             _mapper = mapper;
             _authRepository = authRepository;
             _logger = logger;
+            _dataContext = dataContext;
         }
 
 
@@ -57,7 +60,7 @@ namespace apief.Services
         }
 
 
-        public async Task<List<Password>> GetAllPasswordsForUserAsync(Guid userId)
+        public async Task<List<PasswordResponsDto>> GetAllPasswordsForUserAsync(Guid userId)
         {
             _logger.LogInfo("Fetching all passwords for user with ID: {UserId}", userId);
 
@@ -67,15 +70,99 @@ namespace apief.Services
             {
                 passwords = await _passwordRepository.GetAllPasswordsByUserIdAsync(userId);
                 _logger.LogInfo("Successfully fetched {PasswordCount} passwords for user with ID: {UserId}", passwords.Count, userId);
+
             }
             catch (Exception ex)
             {
                 _logger.LogWarning("Error occurred while fetching passwords for user with ID: {UserId}. Exception: {ExceptionMessage}", userId, ex.Message);
                 throw;
             }
+            var passwordDtos = passwords.Select(p => new PasswordResponsDto
+            {
+                id = p.id,
+                passwordId = p.passwordId,
+                password = p.password,
+                organization = p.organization,
+                title = p.title,
+                lastEdit = p.lastEdit,
+                additionalFields = p.additionalFields.Select(af => new AdditionalFieldDto
+                {
+                    title = af.title,
+                    value = af.value
+                }).ToList()
+            }).ToList();
 
-            return passwords;
+            return passwordDtos;
         }
+
+
+        public async Task<PasswordDto> UpdatePassword(Guid userId, Guid passwordId, PasswordDto userInput)
+        {
+            
+            var existingPassword = await _passwordRepository.GetOnePasswordAsync(userId, passwordId);
+
+            if (existingPassword == null)
+            {
+                throw new Exception("Password not found");
+            }
+
+            existingPassword.password = userInput.password;
+            existingPassword.organization = userInput.organization;
+            existingPassword.title = userInput.title;
+            existingPassword.lastEdit = userInput.lastEdit;
+
+            var existingAdditionalFields = existingPassword.additionalFields.ToList();
+
+            var fieldsToRemove = existingAdditionalFields
+                .Where(f => !userInput.additionalFields.Any(dto => dto.additionalId == f.additionalId))
+                .ToList();
+
+            await _passwordRepository.RemoveAdditionalFieldsAsync(fieldsToRemove);
+
+            foreach (var fieldDto in userInput.additionalFields)
+            {
+                var existingField = existingAdditionalFields
+                    .FirstOrDefault(f => f.additionalId == fieldDto.additionalId);
+
+                if (existingField != null)
+                {
+                    existingField.title = fieldDto.title;
+                    existingField.value = fieldDto.value;
+                }
+                else
+                {
+                    var newField = new AdditionalField
+                    {
+                        passwordId = existingPassword.passwordId,
+                        additionalId = Guid.NewGuid(),
+                        title = fieldDto.title,
+                        value = fieldDto.value
+                    };
+
+                    await _passwordRepository.AddAdditionalFieldAsync(newField);
+                }
+            }
+
+            
+
+            var updatedPasswordDto = new PasswordDto
+            {
+                password = existingPassword.password,
+                organization = existingPassword.organization,
+                title = existingPassword.title,
+                lastEdit = existingPassword.lastEdit,
+                additionalFields = userInput.additionalFields
+            };
+
+            return updatedPasswordDto;
+        }
+
+
+
+
+
+
+
 
 
         public async Task<User> GetUserByTokenAsync(ClaimsPrincipal userClaims)
@@ -101,7 +188,6 @@ namespace apief.Services
 
             return user;
         }
-
 
 
     }

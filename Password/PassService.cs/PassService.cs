@@ -98,9 +98,9 @@ namespace apief.Services
 
         public async Task<PasswordDto> UpdatePassword(Guid userId, Guid passwordId, PasswordDto userInput)
         {
-            
-            var existingPassword = await _passwordRepository.GetOnePasswordAsync(userId, passwordId);
 
+            var existingPassword = await _passwordRepository.GetOnePasswordAsync(userId, passwordId);
+            
             if (existingPassword == null)
             {
                 throw new Exception("Password not found");
@@ -143,8 +143,6 @@ namespace apief.Services
                 }
             }
 
-            
-
             var updatedPasswordDto = new PasswordDto
             {
                 password = existingPassword.password,
@@ -158,6 +156,32 @@ namespace apief.Services
         }
 
 
+        public async Task DeletePasswordAsync(Guid userId, Guid passwordId)
+        {
+          
+            var existingPassword = await _passwordRepository.GetOnePasswordAsync(userId, passwordId);
+            
+            if (existingPassword == null)
+            {
+                throw new Exception("Password not found");
+            }
+            
+
+
+
+            try
+            {
+                // Удаление пароля
+                await _passwordRepository.DeletePasswordDataAsync(passwordId);
+                _logger.LogInfo("Successfully deleted password with ID: {PasswordId}", passwordId);
+            }
+            catch (Exception ex)
+            {
+                // Логируем ошибку, если что-то пошло не так
+                _logger.LogInfo("Error occurred while deleting password with ID: {PasswordId}. Exception: {ExceptionMessage}", passwordId, ex.Message);
+                throw new Exception("Error occurred while deleting the password.");
+            }
+        }
 
 
 

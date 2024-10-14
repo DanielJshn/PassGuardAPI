@@ -58,12 +58,29 @@ namespace apief
             {
                 var identity = await _passwordService.GetUserByTokenAsync(User);
                 PasswordDto updatedPassword = await _passwordService.UpdatePassword(identity.id, passwordId, dataInput);
-                return Ok(updatedPassword);
+                return Ok(new ApiResponse(success: true, data: updatedPassword));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new ApiResponse(success: false, message: ex.Message));
             }
         }
+
+
+        [HttpDelete("{passwordId}")]
+        public async Task<IActionResult> DeletePassword(Guid passwordId)
+        {
+            try
+            {
+                var identity = await _passwordService.GetUserByTokenAsync(User);
+                await _passwordService.DeletePasswordAsync(identity.id ,passwordId);
+                return Ok(new ApiResponse(success: true, data: "Password successfully deleted"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(success: false, message: ex.Message));
+            }
+        }
+
     }
 }

@@ -8,10 +8,12 @@ namespace apief
     {
 
         private readonly IPassService _passwordService;
+        private readonly IIdentityUser _identity;
 
-        public PassController(IPassService passwordService)
+        public PassController(IPassService passwordService, IIdentityUser identity)
         {
             _passwordService = passwordService;
+            _identity = identity;
         }
 
 
@@ -24,7 +26,7 @@ namespace apief
                 {
                     return BadRequest("Password data is null.");
                 }
-                var identity = await _passwordService.GetUserByTokenAsync(User);
+                var identity = await _identity.GetUserByTokenAsync(User);
                 var createdPassword = await _passwordService.CreateAsync(password, identity.id);
                 return Ok(new ApiResponse(success: true, data: createdPassword));
             }
@@ -40,7 +42,7 @@ namespace apief
         {
             try
             {
-                var identity = await _passwordService.GetUserByTokenAsync(User);
+                var identity = await _identity.GetUserByTokenAsync(User);
                 List<PasswordResponsDto> getPassword = await _passwordService.GetAllPasswordsForUserAsync(identity.id);
                 return Ok(new ApiResponse(success: true, data: getPassword));
             }
@@ -56,7 +58,7 @@ namespace apief
         {
             try
             {
-                var identity = await _passwordService.GetUserByTokenAsync(User);
+                var identity = await _identity.GetUserByTokenAsync(User);
                 PasswordDto updatedPassword = await _passwordService.UpdatePassword(identity.id, passwordId, dataInput);
                 return Ok(new ApiResponse(success: true, data: updatedPassword));
             }
@@ -72,8 +74,8 @@ namespace apief
         {
             try
             {
-                var identity = await _passwordService.GetUserByTokenAsync(User);
-                await _passwordService.DeletePasswordAsync(identity.id ,passwordId);
+                var identity = await _identity.GetUserByTokenAsync(User);
+                await _passwordService.DeletePasswordAsync(identity.id, passwordId);
                 return Ok(new ApiResponse(success: true, data: "Password successfully deleted"));
             }
             catch (Exception ex)

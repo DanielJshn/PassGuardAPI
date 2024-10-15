@@ -37,6 +37,7 @@ builder.Services.AddLogging();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<ILog, Log>();
+builder.Services.AddScoped<IIdentityUser, IdentityUser>();
 
 builder.Services.AddScoped<IAuthHelp, AuthHelp>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -50,7 +51,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-
+    
     app.UseSwaggerUI();
 }
 

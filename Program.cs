@@ -46,6 +46,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPassRepository, PassRepository>();
 builder.Services.AddScoped<IPassService, PassService>();
 
+builder.Services.AddScoped<INoteRepository, NoteRepository>();
+builder.Services.AddScoped<INoteService, NoteService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

@@ -5,9 +5,9 @@ namespace apief
 {
     public class IdentityUser : IIdentityUser
     {
-        private readonly AuthRepository _authRepository;
+        private readonly IAuthRepository _authRepository;
         private readonly ILog _logger;
-        public IdentityUser(AuthRepository authRepository, ILog log)
+        public IdentityUser(IAuthRepository authRepository, ILog log)
         {
             _authRepository = authRepository;
             _logger = log;

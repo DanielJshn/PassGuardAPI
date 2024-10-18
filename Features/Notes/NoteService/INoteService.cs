@@ -1,7 +1,7 @@
 namespace apief
 {
-    public interface INoteservice
+    public interface INoteService
     {
-        
+        Task<NoteDto> CreateNoteAsync(NoteDto noteDto, Guid userId);
     }
 }

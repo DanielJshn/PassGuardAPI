@@ -9,6 +9,7 @@ namespace apief
             CreateMap<Password, PasswordDto>().ReverseMap();
             CreateMap<Password, PasswordResponsDto>().ReverseMap();
             CreateMap<AdditionalField, AdditionalFieldDto>().ReverseMap();
+            CreateMap<Note, NoteDto>().ReverseMap();
         }
     }
 }

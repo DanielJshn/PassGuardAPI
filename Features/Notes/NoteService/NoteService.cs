@@ -43,13 +43,13 @@ namespace apief
             return _mapper.Map<NoteDto>(noteDto);
         }
 
-        public async Task<List<NoteDto>> GetNotesAsync(Guid userId)
+        public async Task<List<NoteResponseDto>> GetNotesAsync(Guid userId)
         {
             var notes = await _noteRepository.GetNotesAsync(userId);
 
             _logger.LogInfo("Tasks for user {UserId} retrieved successfully.", userId);
 
-            return _mapper.Map<List<NoteDto>>(notes);
+            return _mapper.Map<List<NoteResponseDto>>(notes);
         }
     }
 }

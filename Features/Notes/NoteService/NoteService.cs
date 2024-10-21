@@ -35,12 +35,21 @@ namespace apief
             noteModel.noteId = Guid.NewGuid();
             noteModel.id = userId;
             noteModel.lastEdit = DateTime.UtcNow.ToString();
-            
+
 
             await _noteRepository.AddAsync(noteModel);
 
             _logger.LogInfo("Task {TaskId} created successfully for user {UserId}.", noteModel.id, userId);
             return _mapper.Map<NoteDto>(noteDto);
+        }
+
+        public async Task<List<NoteDto>> GetNotesAsync(Guid userId)
+        {
+            var notes = await _noteRepository.GetNotesAsync(userId);
+
+            _logger.LogInfo("Tasks for user {UserId} retrieved successfully.", userId);
+
+            return _mapper.Map<List<NoteDto>>(notes);
         }
     }
 }

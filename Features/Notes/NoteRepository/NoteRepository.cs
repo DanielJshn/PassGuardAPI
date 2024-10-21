@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace apief
 {
     public class NoteRepository : INoteRepository
@@ -14,6 +16,15 @@ namespace apief
         {
             await _dataContext.Notes.AddAsync(note);
             await _dataContext.SaveChangesAsync();
+        }
+
+
+        public async Task<IEnumerable<Note>> GetNotesAsync(Guid userId)
+        {
+
+            return await _dataContext.Notes
+                .Where(t => t.id == userId)
+                .ToListAsync();
         }
     }
 }

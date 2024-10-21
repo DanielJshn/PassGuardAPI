@@ -30,5 +30,20 @@ namespace apief
                 return BadRequest(new ApiResponse(success: false, message: ex.Message));
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetNote()
+        {
+            try
+            {
+                var identity = await _identity.GetUserByTokenAsync(User);
+                var response = await _notesService.GetNotesAsync(identity.id);
+                return Ok(new ApiResponse(success: true, data: response));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(success: false, message: ex.Message));
+            }
+        }
     }
 }

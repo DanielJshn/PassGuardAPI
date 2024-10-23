@@ -4,6 +4,5 @@ namespace apief
     {
         public string? title { get; set; }
         public string? description { get; set; }
-        public string? lastEdit { get; set; }
     }
 }

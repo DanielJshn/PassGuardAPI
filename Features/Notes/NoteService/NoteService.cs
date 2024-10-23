@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using AutoMapper;
 
 namespace apief
@@ -16,32 +17,33 @@ namespace apief
         }
 
 
-        public async Task<NoteDto> CreateNoteAsync(NoteDto noteDto, Guid userId)
+        public async Task<NoteResponseDto> CreateNoteAsync(NoteDto noteDto, Guid userId)
         {
 
             if (string.IsNullOrWhiteSpace(noteDto.title))
             {
                 throw new Exception("Title is required"); ;
             }
-            _logger.LogInfo("Creating new task for user {UserId}.", userId);
+     
 
             if (string.IsNullOrEmpty(noteDto.title))
             {
-                _logger.LogWarning("Task creation failed: Title is required.");
+           
                 throw new ArgumentException("Title is required");
             }
 
             var noteModel = _mapper.Map<Note>(noteDto);
             noteModel.noteId = Guid.NewGuid();
             noteModel.id = userId;
-            noteModel.lastEdit = DateTime.UtcNow.ToString();
+            noteModel.lastEdit = DateTime.UtcNow;
 
 
             await _noteRepository.AddAsync(noteModel);
 
-            _logger.LogInfo("Task {TaskId} created successfully for user {UserId}.", noteModel.id, userId);
-            return _mapper.Map<NoteDto>(noteDto);
+            
+            return _mapper.Map<NoteResponseDto>(noteModel);
         }
+
 
         public async Task<List<NoteResponseDto>> GetNotesAsync(Guid userId)
         {
@@ -50,6 +52,22 @@ namespace apief
             _logger.LogInfo("Tasks for user {UserId} retrieved successfully.", userId);
 
             return _mapper.Map<List<NoteResponseDto>>(notes);
+        }
+
+
+        public async Task<NoteResponseDto> UpdateNoteAsync(Guid noteid, NoteDto noteDto, Guid userId)
+        {
+            var note = await _noteRepository.GetNoteByUserId(noteid);
+
+            note.title = noteDto.title;
+            note.description = noteDto.description;
+            note.lastEdit = DateTime.UtcNow;
+            note.noteId= noteid;
+
+            await _noteRepository.UpdateAsync(note);
+
+            _logger.LogInfo("Task {TaskId} updated successfully for user {UserId}.", noteid, userId);
+            return _mapper.Map<NoteResponseDto>(note);
         }
     }
 }

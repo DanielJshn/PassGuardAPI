@@ -45,5 +45,22 @@ namespace apief
                 return BadRequest(new ApiResponse(success: false, message: ex.Message));
             }
         }
+
+
+        [HttpPut("id")]
+        public async Task<IActionResult> PutNote(Guid noteid, NoteDto note)
+        {
+            try
+            {
+                var identity = await _identity.GetUserByTokenAsync(User);
+                var updateNote = await _notesService.UpdateNoteAsync(noteid, note, identity.id);
+                return Ok(new ApiResponse(success: true, data: updateNote));
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(success: false, message: ex.Message));
+            }
+        }
     }
 }

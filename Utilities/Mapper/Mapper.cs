@@ -11,6 +11,7 @@ namespace apief
             CreateMap<AdditionalField, AdditionalFieldDto>().ReverseMap();
             CreateMap<Note, NoteDto>().ReverseMap();
             CreateMap<Note, NoteResponseDto>().ReverseMap();
+            CreateMap<NoteDto, NoteResponseDto>().ReverseMap();
         }
     }
 }

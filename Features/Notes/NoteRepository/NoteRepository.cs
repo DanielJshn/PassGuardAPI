@@ -26,5 +26,19 @@ namespace apief
                 .Where(t => t.id == userId)
                 .ToListAsync();
         }
+
+
+        public async Task<Note> GetNoteByUserId(Guid noteId)
+        {
+            return await _dataContext.Notes.FirstOrDefaultAsync(t => t.noteId == noteId);
+        }
+
+
+        public async Task UpdateAsync(Note note)
+        {
+            _dataContext.Notes.Update(note);
+
+            await _dataContext.SaveChangesAsync();
+        }
     }
 }

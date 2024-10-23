@@ -47,13 +47,13 @@ namespace apief
         }
 
 
-        [HttpPut("id")]
-        public async Task<IActionResult> PutNote(Guid noteid, NoteDto note)
+        [HttpPut("noteId")]
+        public async Task<IActionResult> PutNote(Guid noteId, NoteDto note)
         {
             try
             {
                 var identity = await _identity.GetUserByTokenAsync(User);
-                var updateNote = await _notesService.UpdateNoteAsync(noteid, note, identity.id);
+                var updateNote = await _notesService.UpdateNoteAsync(noteId, note, identity.id);
                 return Ok(new ApiResponse(success: true, data: updateNote));
 
             }

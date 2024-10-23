@@ -55,18 +55,18 @@ namespace apief
         }
 
 
-        public async Task<NoteResponseDto> UpdateNoteAsync(Guid noteid, NoteDto noteDto, Guid userId)
+        public async Task<NoteResponseDto> UpdateNoteAsync(Guid noteId, NoteDto noteDto, Guid userId)
         {
-            var note = await _noteRepository.GetNoteByUserId(noteid);
-
+            var note = await _noteRepository.GetNoteByUserId(noteId);
+            note.id = userId;
             note.title = noteDto.title;
             note.description = noteDto.description;
             note.lastEdit = DateTime.UtcNow;
-            note.noteId= noteid;
+            note.noteId= noteId;
 
             await _noteRepository.UpdateAsync(note);
 
-            _logger.LogInfo("Task {TaskId} updated successfully for user {UserId}.", noteid, userId);
+            
             return _mapper.Map<NoteResponseDto>(note);
         }
     }

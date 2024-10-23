@@ -28,9 +28,9 @@ namespace apief
         }
 
 
-        public async Task<Note> GetNoteByUserId(Guid Id)
+        public async Task<Note> GetNoteByUserId(Guid noteId)
         {
-            return await _dataContext.Notes.FirstOrDefaultAsync(t => t.id == Id);
+            return await _dataContext.Notes.FirstOrDefaultAsync(t => t.noteId == noteId);
         }
 
 

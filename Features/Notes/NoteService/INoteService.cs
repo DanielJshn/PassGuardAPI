@@ -5,5 +5,6 @@ namespace apief
         Task<NoteResponseDto> CreateNoteAsync(NoteDto noteDto, Guid userId);
         Task<List<NoteResponseDto>> GetNotesAsync(Guid userId);
         Task<NoteResponseDto> UpdateNoteAsync(Guid noteId, NoteDto noteDto, Guid userId);
+        Task DeleteNoteAsync(Guid noteId, Guid userId);
     }
 }

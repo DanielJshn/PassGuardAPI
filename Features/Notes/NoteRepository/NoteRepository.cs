@@ -40,5 +40,17 @@ namespace apief
 
             await _dataContext.SaveChangesAsync();
         }
+
+        public async Task DeleteNoteAsync(Guid noteId)
+        {
+             var note = await _dataContext.Notes
+        .FirstOrDefaultAsync(p => p.noteId == noteId);
+
+            if (note != null)
+            {
+                _dataContext.Notes.Remove(note);
+                await _dataContext.SaveChangesAsync(); 
+            }
+        }
     }
 }

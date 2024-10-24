@@ -62,5 +62,21 @@ namespace apief
                 return BadRequest(new ApiResponse(success: false, message: ex.Message));
             }
         }
+
+
+        [HttpDelete("noteId")]
+        public async Task<IActionResult> DeleteNote(Guid noteId)
+        {
+            try
+            {
+                var identity = await _identity.GetUserByTokenAsync(User);
+                await _notesService.DeleteNoteAsync(noteId, identity.id);
+                return Ok(new ApiResponse(success: true, data: Ok()));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(success: false, message: ex.Message));
+            }
+        }
     }
 }

@@ -47,18 +47,15 @@ namespace apief
         {
             _logger.LogInfo("Start retrieving notes for user {UserId}.", userId);
 
-            // Получаем заметки пользователя
             var notes = await _noteRepository.GetNotesAsync(userId);
             var noteCount = notes.Count();
 
-            // Проверка на наличие заметок
             if (notes == null || !notes.Any())
             {
                 _logger.LogWarning("No notes found for user {UserId}.", userId);
-                return new List<NoteResponseDto>(); // Возвращаем пустой список, если заметок нет
+                return new List<NoteResponseDto>();
             }
 
-            // Лог успешного получения заметок
             _logger.LogInfo("{NoteCount} notes retrieved successfully for user {UserId}.", noteCount, userId);
 
             return _mapper.Map<List<NoteResponseDto>>(notes);
@@ -94,6 +91,19 @@ namespace apief
             _logger.LogInfo("Note {NoteId} updated successfully for user {UserId}.", note.noteId, userId);
 
             return _mapper.Map<NoteResponseDto>(note);
+        }
+
+
+        public async Task DeleteNoteAsync(Guid noteId, Guid userId)
+        {
+            var existingPassword = await _noteRepository.GetNoteByUserId(noteId);
+
+            if (existingPassword == null)
+            {
+                _logger.LogWarning("Note with ID: {NoteId} not found for user: {UserId}", noteId, userId);
+                throw new Exception("Note not found");
+            }
+            await _noteRepository.DeleteNoteAsync(noteId);
         }
 
     }

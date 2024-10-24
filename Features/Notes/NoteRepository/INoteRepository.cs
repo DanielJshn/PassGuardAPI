@@ -6,5 +6,6 @@ namespace apief
         Task<IEnumerable<Note>> GetNotesAsync(Guid userId);
         Task<Note> GetNoteByUserId(Guid Id);
         Task UpdateAsync(Note note);
+        Task DeleteNoteAsync(Guid noteId);
     }
 }

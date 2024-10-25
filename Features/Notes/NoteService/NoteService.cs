@@ -96,15 +96,19 @@ namespace apief
 
         public async Task DeleteNoteAsync(Guid noteId, Guid userId)
         {
-            var existingPassword = await _noteRepository.GetNoteByUserId(noteId);
+            _logger.LogInfo("Start deleting note with ID: {NoteId} for user: {UserId}.", noteId, userId);
 
-            if (existingPassword == null)
+            var existingNote = await _noteRepository.GetNoteByUserId(noteId);
+
+            if (existingNote == null)
             {
-                _logger.LogWarning("Note with ID: {NoteId} not found for user: {UserId}", noteId, userId);
+                _logger.LogWarning("Note with ID: {NoteId} not found for user: {UserId}.", noteId, userId);
                 throw new Exception("Note not found");
             }
-            await _noteRepository.DeleteNoteAsync(noteId);
-        }
 
+            await _noteRepository.DeleteNoteAsync(noteId);
+
+            _logger.LogInfo("Note with ID: {NoteId} successfully deleted for user: {UserId}.", noteId, userId);
+        }
     }
 }

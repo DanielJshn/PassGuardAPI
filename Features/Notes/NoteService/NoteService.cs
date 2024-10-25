@@ -42,7 +42,6 @@ namespace apief
         }
 
 
-
         public async Task<List<NoteResponseDto>> GetNotesAsync(Guid userId)
         {
             _logger.LogInfo("Start retrieving notes for user {UserId}.", userId);
@@ -60,7 +59,6 @@ namespace apief
 
             return _mapper.Map<List<NoteResponseDto>>(notes);
         }
-
 
 
         public async Task<NoteResponseDto> UpdateNoteAsync(Guid noteId, NoteDto noteDto, Guid userId)

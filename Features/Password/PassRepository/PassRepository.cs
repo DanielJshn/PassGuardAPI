@@ -10,11 +10,11 @@ namespace apief
     {
         private readonly DataContext _context;
 
-
         public PassRepository(DataContext context)
         {
             _context = context;
         }
+
 
         public async Task AddAsync(Password password)
         {

@@ -19,9 +19,8 @@ namespace apief
             _crypted = crypted;
         }
 
-
         [AllowAnonymous]
-        [HttpPost("Encr")]
+        [HttpPost("Encrypted")]
         public IActionResult Encrypted(userForRegistration userForRegistration)
         {
 
@@ -38,7 +37,6 @@ namespace apief
                 Key = base64Key,
                 IV = base64IV
             };
-
             return Ok(result);
         }
 
@@ -51,17 +49,13 @@ namespace apief
             string base64Key = _keycon.GetSecretKey();
             string base64IV = _keycon.GetIV();
 
-
-
             byte[] keyBytes = Convert.FromBase64String(base64Key);
             byte[] ivBytes = Convert.FromBase64String(base64IV);
-
 
             if (keyBytes.Length != 32)
                 throw new ArgumentException("Invalid key length. Must be 32 bytes for AES-256.");
             if (ivBytes.Length != 16)
                 throw new ArgumentException("Invalid IV length. Must be 16 bytes for AES.");
-
 
             string decryptedEmail = _crypted.DecryptStringAES(userForRegistration.email, base64Key, base64IV);
             string decryptedPassword = _crypted.DecryptStringAES(userForRegistration.password, base64Key, base64IV);
@@ -107,7 +101,6 @@ namespace apief
             {
                 return BadRequest(new ApiResponse(success: false, message: ex.Message));
             }
-
             return Ok(new ApiResponse(success: true, data: new { Token = newToken }));
         } 
     }

@@ -49,10 +49,10 @@ namespace apief.Services
                 throw;
             }
 
-            var createdPasswordDto = _mapper.Map<PasswordDto>(passModel);
+            var responseDto = _mapper.Map<PasswordDto>(passModel);
             _logger.LogInfo("Password with ID: {PasswordId} successfully mapped to DTO");
 
-            return createdPasswordDto;
+            return responseDto;
         }
 
 
@@ -73,7 +73,7 @@ namespace apief.Services
                 _logger.LogWarning("Error occurred while fetching passwords for user with ID: {UserId}. Exception: {ExceptionMessage}", userId, ex.Message);
                 throw;
             }
-            var passwordDtos = passwords.Select(p => new PasswordResponsDto
+            var responseDto = passwords.Select(p => new PasswordResponsDto
             {
                 id = p.id,
                 passwordId = p.passwordId,
@@ -88,7 +88,7 @@ namespace apief.Services
                 }).ToList()
             }).ToList();
 
-            return passwordDtos;
+            return responseDto;
         }
 
 
@@ -151,7 +151,7 @@ namespace apief.Services
 
             _logger.LogInfo("Saving changes to the database for password ID: {PasswordId}", passwordId);
 
-            var updatedPasswordDto = new PasswordDto
+            var responseDto = new PasswordDto
             {
                 password = existingPassword.password,
                 organization = existingPassword.organization,
@@ -162,7 +162,7 @@ namespace apief.Services
 
             _logger.LogInfo("Password with ID: {PasswordId} successfully updated for user: {UserId}", passwordId, userId);
 
-            return updatedPasswordDto;
+            return responseDto;
         }
 
 

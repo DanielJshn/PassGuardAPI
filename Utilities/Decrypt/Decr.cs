@@ -42,6 +42,7 @@ namespace apief
             }
         }
 
+
         public string EncryptStringAES(string plainText, string base64Key, string base64IV)
         {
             byte[] keyBytes = Convert.FromBase64String(base64Key);

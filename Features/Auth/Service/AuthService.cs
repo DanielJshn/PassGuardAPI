@@ -15,7 +15,6 @@ namespace apief
             _logger = logger;
         }
 
-        private const int REQUIRED_USER_NAME_LENGTH = 3;
         private const int REQUIRED_USER_PASSWORD_LENGTH = 8;
 
         public async Task CheckUserExistsAsync(userForRegistration userForRegistration)
@@ -40,11 +39,6 @@ namespace apief
         }
 
 
-
-
-
-
-
         public async Task CheckEmailAsync(userForRegistration userForLogin)
         {
             _logger.LogInfo("Checking if email exists for login: {Email}", userForLogin.email);
@@ -56,8 +50,6 @@ namespace apief
                 throw new Exception("Incorrect Email");
             }
         }
-
-
 
 
         public Task ValidateRegistrationDataAsync(userForRegistration userForRegistration)
@@ -111,6 +103,7 @@ namespace apief
             }
         }
 
+
         public async Task<string> GenerateTokenAsync(userForRegistration userForRegistration)
         {
 
@@ -146,6 +139,12 @@ namespace apief
             string token = _authHelp.GenerateNewToken(email);
             _logger.LogInfo("Token generated for login: {Email}", email);
             return Task.FromResult(token);
+        }
+
+
+        public async Task DeleteAllDataByUserId(Guid userId)
+        {
+           await _authRepository.DeleteData(userId);
         }
 
     }

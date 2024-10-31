@@ -9,14 +9,20 @@ namespace apief
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IPassService _passwordService;
+        private readonly INoteService _noteService;
+        private readonly IIdentityUser _identity;
         private readonly KeyConfig _keycon;
         private readonly Crypted _crypted;
 
-        public AuthController(IAuthService authService, KeyConfig keycon, Crypted crypted)
+        public AuthController(IAuthService authService, KeyConfig keycon, Crypted crypted, IPassService passwordService, INoteService noteService, IIdentityUser identityUser)
         {
             _authService = authService;
+            _passwordService = passwordService;
+            _noteService = noteService;
             _keycon = keycon;
             _crypted = crypted;
+            _identity = identityUser;
         }
 
         [AllowAnonymous]
@@ -102,6 +108,22 @@ namespace apief
                 return BadRequest(new ApiResponse(success: false, message: ex.Message));
             }
             return Ok(new ApiResponse(success: true, data: new { Token = newToken }));
-        } 
+        }
+
+
+        [HttpDelete("DeleteAllData")]
+        public async Task<IActionResult> DeletedAllData()
+        {
+            try
+            {
+                var identity = await _identity.GetUserByTokenAsync(User);
+                await _authService.DeleteAllDataByUserId(identity.id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok("Account deleted");
+        }
     }
 }

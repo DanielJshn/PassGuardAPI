@@ -23,5 +23,15 @@ namespace testProd.auth
             await _dataContext.Users.AddAsync(user);
             await _dataContext.SaveChangesAsync();
         }
+
+
+        public async Task DeleteData(Guid userId)
+        {
+            var user = await _dataContext.Users
+                 .FirstOrDefaultAsync(p => p.id == userId);
+
+            _dataContext.Users.Remove(user);
+            await _dataContext.SaveChangesAsync();
+        }
     }
 }

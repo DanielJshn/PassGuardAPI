@@ -8,5 +8,6 @@ namespace apief
         Task CheckPasswordAsync(userForRegistration userForLogin);
         Task ValidateRegistrationDataAsync(userForRegistration userForRegistration);
         Task<string> GenerateTokenForLogin(userForRegistration userAuthDto);
+        Task DeleteAllDataByUserId(Guid userId);
     }
 }

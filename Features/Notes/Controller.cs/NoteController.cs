@@ -48,7 +48,7 @@ namespace apief
         }
 
 
-        [HttpPut("noteId")]
+        [HttpPut("noteId")] // http://localhost:5115/Note/noteId?noteId= -> http://localhost:5115/Note?noteId=
         public async Task<IActionResult> PutNote(Guid noteId, NoteDto note)
         {
             try
@@ -65,7 +65,7 @@ namespace apief
         }
 
 
-        [HttpDelete("noteId")]
+        [HttpDelete("noteId")] // http://localhost:5115/Note/noteId?noteId= -> http://localhost:5115/Note?noteId=
         public async Task<IActionResult> DeleteNote(Guid noteId)
         {
             try

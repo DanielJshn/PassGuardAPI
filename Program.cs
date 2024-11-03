@@ -36,7 +36,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddLogging();
 builder.Services.AddSingleton<KeyConfig>();
-builder.Services.AddScoped<Crypted>();
+builder.Services.AddScoped<EncryptionUtils>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<ILog, Log>();

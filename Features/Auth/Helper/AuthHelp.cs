@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace testProd.auth
 {
-    public class AuthHelp :IAuthHelp
+    public class AuthHelp : IAuthHelp 
     {
         private readonly IConfiguration _config;
         private const int TOKEN_EXPIRATION_MONTHS = 1;
@@ -33,7 +33,7 @@ namespace testProd.auth
                 password: password,
                 salt: passwordKey,  
                 prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 1000000,
+                iterationCount: 1000000, 
                 numBytesRequested: 256 / 8
             );
             string passwordHashBase64 = Convert.ToBase64String(passwordHash);

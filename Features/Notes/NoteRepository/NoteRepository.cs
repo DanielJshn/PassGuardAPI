@@ -30,7 +30,12 @@ namespace apief
 
         public async Task<Note> GetNoteByUserId(Guid noteId)
         {
-            return await _dataContext.Notes.FirstOrDefaultAsync(t => t.noteId == noteId);
+            var result = await _dataContext.Notes.FirstOrDefaultAsync(t => t.noteId == noteId);
+            if (result == null)
+            {
+                throw new Exception("Note is not found");
+            }
+            return result;
         }
 
 
@@ -45,7 +50,7 @@ namespace apief
         public async Task DeleteNoteAsync(Guid noteId)
         {
             var note = await _dataContext.Notes
-       .FirstOrDefaultAsync(p => p.noteId == noteId);
+                .FirstOrDefaultAsync(p => p.noteId == noteId);
 
             if (note != null)
             {

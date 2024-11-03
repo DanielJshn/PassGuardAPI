@@ -53,7 +53,7 @@ namespace apief
         }
 
 
-        [HttpPut("{passwordId}")]
+        [HttpPut("{passwordId}")] //to query
         public async Task<IActionResult> UpdatePassword(Guid passwordId, [FromBody] PasswordDto dataInput)
         {
             try

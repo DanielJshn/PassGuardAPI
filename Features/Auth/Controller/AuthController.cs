@@ -8,26 +8,25 @@ namespace apief
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
+        private const int KEY_BYTES_LENGTH = 32;
+        private const int VI_BYTES_LENGTH = 16;
         private readonly IAuthService _authService;
-        private readonly IPassService _passwordService;
-        private readonly INoteService _noteService;
         private readonly IIdentityUser _identity;
         private readonly KeyConfig _keycon;
-        private readonly Crypted _crypted;
+        private readonly EncryptionUtils _crypted;
 
-        public AuthController(IAuthService authService, KeyConfig keycon, Crypted crypted, IPassService passwordService, INoteService noteService, IIdentityUser identityUser)
+        public AuthController(IAuthService authService, KeyConfig keycon, EncryptionUtils crypted, IIdentityUser identityUser)
         {
             _authService = authService;
-            _passwordService = passwordService;
-            _noteService = noteService;
             _keycon = keycon;
             _crypted = crypted;
             _identity = identityUser;
         }
 
+
         [AllowAnonymous]
-        [HttpPost("Encrypted")]
-        public IActionResult Encrypted(userForRegistration userForRegistration)
+        [HttpPost("Encrypted")] // this is for testing
+        public IActionResult Encrypted(UserForRegistration userForRegistration)
         {
 
             string base64Key = _keycon.GetSecretKey();
@@ -49,7 +48,7 @@ namespace apief
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<IActionResult> Register(userForRegistration userForRegistration)
+        public async Task<IActionResult> Register(UserForRegistration userForRegistration)
         {
             string token;
             string base64Key = _keycon.GetSecretKey();
@@ -58,9 +57,9 @@ namespace apief
             byte[] keyBytes = Convert.FromBase64String(base64Key);
             byte[] ivBytes = Convert.FromBase64String(base64IV);
 
-            if (keyBytes.Length != 32)
+            if (keyBytes.Length != KEY_BYTES_LENGTH) 
                 throw new ArgumentException("Invalid key length. Must be 32 bytes for AES-256.");
-            if (ivBytes.Length != 16)
+            if (ivBytes.Length != VI_BYTES_LENGTH) 
                 throw new ArgumentException("Invalid IV length. Must be 16 bytes for AES.");
 
             string decryptedEmail = _crypted.DecryptStringAES(userForRegistration.email, base64Key, base64IV);
@@ -84,7 +83,7 @@ namespace apief
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login(userForRegistration userForLogin)
+        public async Task<IActionResult> Login(UserForRegistration userForLogin)
         {
             string newToken;
             try
@@ -111,7 +110,7 @@ namespace apief
         }
 
 
-        [HttpDelete("DeleteAllData")]
+        [HttpDelete("deleteAllData")] 
         public async Task<IActionResult> DeletedAllData()
         {
             try

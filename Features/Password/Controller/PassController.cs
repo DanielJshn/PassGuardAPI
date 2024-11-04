@@ -28,6 +28,7 @@ namespace apief
                 }
                 var identity = await _identity.GetUserByTokenAsync(User);
                 var createdPassword = await _passwordService.CreateAsync(password, identity.id);
+                Console.WriteLine(createdPassword);
                 return Ok(new ApiResponse(success: true, data: createdPassword));
             }
             catch (Exception ex)

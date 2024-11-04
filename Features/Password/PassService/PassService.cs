@@ -22,14 +22,14 @@ namespace apief.Services
         }
 
 
-        public async Task<PasswordDto> CreateAsync(PasswordDto passwordDto, Guid userId)
+        public async Task<PasswordDto> CreateAsync(PasswordDto passwordDto, Guid userId )
         {
             _logger.LogInfo("Starting password creation for user with ID: {UserId}", userId);
 
             var passModel = _mapper.Map<Password>(passwordDto);
 
-            passModel.passwordId = Guid.NewGuid();
             passModel.id = userId;
+            
 
             _logger.LogInfo("Generated new password ID: {PasswordId}", passModel.passwordId);
 

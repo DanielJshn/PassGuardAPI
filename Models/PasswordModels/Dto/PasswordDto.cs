@@ -2,6 +2,7 @@ namespace apief
 {
     public class PasswordDto
     {
+        public Guid passwordId { get; set; } 
         public string? password { get; set; }
         public string? organization { get; set; }
         public string? title { get; set; }

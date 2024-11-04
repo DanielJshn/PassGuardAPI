@@ -27,7 +27,6 @@ namespace apief.Services
             _logger.LogInfo("Starting password creation for user with ID: {UserId}", userId);
 
             var passModel = _mapper.Map<Password>(passwordDto);
-
             passModel.id = userId;
             
 

@@ -28,7 +28,6 @@ namespace apief
             }
 
             var noteModel = _mapper.Map<Note>(noteDto);
-            noteModel.noteId = Guid.NewGuid();
             noteModel.id = userId;
             noteModel.lastEdit = DateTime.UtcNow;
 

@@ -6,7 +6,7 @@ namespace apief
     {
         Task<List<PasswordResponsDto>> GetAllPasswordsForUserAsync(Guid userId);
         Task<PasswordDto> CreateAsync(PasswordDto passwordDto, Guid userId );
-        Task<PasswordDto> UpdatePassword(Guid id, Guid passwordId, PasswordDto userInput);
+        Task<PasswordDto> UpdatePassword(Guid id, Guid passwordId, PasswordForUpdateDto userInput);
         Task DeletePasswordAsync(Guid passwordId, Guid userId);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -22,13 +23,15 @@ namespace apief.Services
         }
 
 
-        public async Task<PasswordDto> CreateAsync(PasswordDto passwordDto, Guid userId )
+        public async Task<PasswordDto> CreateAsync(PasswordDto passwordDto, Guid userId)
         {
             _logger.LogInfo("Starting password creation for user with ID: {UserId}", userId);
 
             var passModel = _mapper.Map<Password>(passwordDto);
             passModel.id = userId;
-            
+            passModel.createdTime = DateTime.UtcNow.ToString();
+            passModel.modifiedTime = null;
+
 
             _logger.LogInfo("Generated new password ID: {PasswordId}", passModel.passwordId);
 
@@ -39,6 +42,7 @@ namespace apief.Services
             }
             try
             {
+
                 await _passwordRepository.AddAsync(passModel);
                 _logger.LogInfo("Password with ID: {PasswordId} successfully added to the database", passModel.passwordId);
             }
@@ -76,10 +80,12 @@ namespace apief.Services
             {
                 id = p.id,
                 passwordId = p.passwordId,
+                categoryId = p.categoryId,
                 password = p.password,
                 organization = p.organization,
                 title = p.title,
-                lastEdit = p.lastEdit,
+                createdTime = p.createdTime,
+                modifiedTime = p.modifiedTime,
                 additionalFields = p.additionalFields.Select(af => new AdditionalFieldDto
                 {
                     title = af.title,
@@ -91,7 +97,7 @@ namespace apief.Services
         }
 
 
-        public async Task<PasswordDto> UpdatePassword(Guid userId, Guid passwordId, PasswordDto userInput)
+        public async Task<PasswordDto> UpdatePassword(Guid userId, Guid passwordId, PasswordForUpdateDto userInput)
         {
             _logger.LogInfo("Attempting to update password with ID: {PasswordId} for user: {UserId}", passwordId, userId);
 
@@ -105,10 +111,14 @@ namespace apief.Services
 
             _logger.LogInfo("Password found for ID: {PasswordId}. Updating fields.", passwordId);
 
+            existingPassword.categoryId = userInput.categoryId;
             existingPassword.password = userInput.password;
             existingPassword.organization = userInput.organization;
+            existingPassword.organizationLogo = userInput.organizationLogo;
             existingPassword.title = userInput.title;
-            existingPassword.lastEdit = userInput.lastEdit;
+            existingPassword.modifiedTime = DateTime.UtcNow.ToString();
+
+            
 
             var existingAdditionalFields = existingPassword.additionalFields.ToList();
 
@@ -147,15 +157,19 @@ namespace apief.Services
                     await _passwordRepository.AddAdditionalFieldAsync(newField);
                 }
             }
+            await _passwordRepository.UpdateAsync(existingPassword);
 
             _logger.LogInfo("Saving changes to the database for password ID: {PasswordId}", passwordId);
 
             var responseDto = new PasswordDto
             {
+                passwordId= existingPassword.passwordId,
                 password = existingPassword.password,
                 organization = existingPassword.organization,
                 title = existingPassword.title,
-                lastEdit = existingPassword.lastEdit,
+                createdTime = existingPassword.createdTime,
+                modifiedTime = existingPassword.modifiedTime,
+                categoryId = existingPassword.categoryId,
                 additionalFields = userInput.additionalFields
             };
 

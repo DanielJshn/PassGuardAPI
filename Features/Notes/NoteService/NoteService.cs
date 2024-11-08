@@ -29,7 +29,8 @@ namespace apief
 
             var noteModel = _mapper.Map<Note>(noteDto);
             noteModel.id = userId;
-            noteModel.lastEdit = DateTime.UtcNow;
+            noteModel.createdTime = DateTime.UtcNow.ToString();
+            noteModel.modifiedTime = null;
 
             _logger.LogInfo("Creating note {NoteId} for user {UserId}.", noteModel.noteId, userId);
 
@@ -79,7 +80,9 @@ namespace apief
 
             note.title = noteDto.title;
             note.description = noteDto.description;
-            note.lastEdit = DateTime.UtcNow;
+            note.backgroundColorHex = noteDto.backgroundColorHex;
+            note.modifiedTime = DateTime.UtcNow.ToString();
+            note.categoryId = noteDto.categoryId;
 
             _logger.LogInfo("Updating note {NoteId} for user {UserId}.", note.noteId, userId);
 

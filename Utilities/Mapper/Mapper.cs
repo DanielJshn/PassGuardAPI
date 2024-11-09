@@ -13,6 +13,7 @@ namespace apief
             CreateMap<Note, NoteDto>().ReverseMap();
             CreateMap<Note, NoteResponseDto>().ReverseMap();
             CreateMap<NoteDto, NoteResponseDto>().ReverseMap();
+            CreateMap<NoteUpdateDto, NoteResponseDto>().ReverseMap();
         }
     }
 }

@@ -28,13 +28,15 @@ namespace apief
         }
 
 
-        public async Task<Note> GetNoteByUserId(Guid noteId)
+        public async Task<Note> GetNoteByNoteId(Guid noteId)
         {
             var result = await _dataContext.Notes.FirstOrDefaultAsync(t => t.noteId == noteId);
+            
             if (result == null)
             {
                 throw new Exception("Note is not found");
             }
+            Console.WriteLine(result + " ww");
             return result;
         }
 

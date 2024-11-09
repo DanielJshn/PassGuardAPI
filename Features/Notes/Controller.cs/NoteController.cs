@@ -49,7 +49,7 @@ namespace apief
 
 
         [HttpPut("noteId")] // http://localhost:5115/Note/noteId?noteId= -> http://localhost:5115/Note?noteId=
-        public async Task<IActionResult> PutNote(Guid noteId, NoteDto note)
+        public async Task<IActionResult> PutNote(Guid noteId, NoteUpdateDto note)
         {
             try
             {

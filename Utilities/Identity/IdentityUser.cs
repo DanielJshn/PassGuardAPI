@@ -19,6 +19,7 @@ namespace apief
             _logger.LogInfo("Attempting to extract email from token claims...");
 
             var email = userClaims.FindFirstValue(ClaimTypes.Email) ?? userClaims.FindFirst("email")?.Value;
+            Console.WriteLine("wwwww " + email);
 
             if (email == null)
             {

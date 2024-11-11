@@ -7,12 +7,12 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace testProd.auth
 {
-    public class AuthHelp : IAuthHelp 
+    public class AuthHelp : IAuthHelp
     {
         private readonly IConfiguration _config;
         private const int TOKEN_EXPIRATION_MONTHS = 1;
         private const string KEY_PASSWORD_KEY = "AppSettings:PasswordKey";
-        public static string KEY_TOKEN_KEY = "AppSettings:TokenKey";
+        public static string KEY_TOKEN_KEY = "JwtSettings:TokenKey";
 
         public AuthHelp(IConfiguration config)
         {
@@ -28,12 +28,12 @@ namespace testProd.auth
             }
 
             byte[] passwordKey = Encoding.ASCII.GetBytes(passwordKeyString);
-          
+
             byte[] passwordHash = KeyDerivation.Pbkdf2(
                 password: password,
-                salt: passwordKey,  
+                salt: passwordKey,
                 prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 1000000, 
+                iterationCount: 1000000,
                 numBytesRequested: 256 / 8
             );
             string passwordHashBase64 = Convert.ToBase64String(passwordHash);
@@ -43,9 +43,10 @@ namespace testProd.auth
 
         public string GenerateNewToken(string userEmail)
         {
+            
             Claim[] claims = new Claim[]
             {
-                new Claim(ClaimTypes.Email, userEmail)
+                new Claim("email", userEmail)
             };
 
             string? tokenKeyString = _config.GetSection(KEY_TOKEN_KEY).Value;
@@ -55,13 +56,18 @@ namespace testProd.auth
                 throw new ArgumentException("TokenKey is not configured.");
             }
 
+           
             SymmetricSecurityKey tokenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKeyString));
             SigningCredentials credentials = new SigningCredentials(tokenKey, SecurityAlgorithms.HmacSha256Signature);
+
+            
             SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
                 SigningCredentials = credentials,
-                Expires = DateTime.Now.AddMonths(TOKEN_EXPIRATION_MONTHS)
+                Expires = DateTime.Now.AddMonths(TOKEN_EXPIRATION_MONTHS), 
+                Issuer = _config["JwtSettings:ValidIssuer"],
+                Audience = _config["JwtSettings:ValidAudience"]
             };
 
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();

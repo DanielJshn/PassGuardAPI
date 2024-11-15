@@ -144,8 +144,16 @@ namespace apief
 
         public async Task DeleteAllDataByUserId(Guid userId)
         {
-           await _authRepository.DeleteData(userId);
-        }
+            try
+            {
+                await _authRepository.DeleteData(userId);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning($"An error occurred while deleting data for user with ID: {userId}");
 
+                throw new ApplicationException($"Error deleting data for user with ID: {userId}", ex);
+            }
+        }
     }
 }

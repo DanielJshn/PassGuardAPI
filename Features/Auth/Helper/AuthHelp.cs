@@ -40,6 +40,7 @@ namespace testProd.auth
 
             return passwordHashBase64;
         }
+        
 
         public string GenerateNewToken(string userEmail)
         {

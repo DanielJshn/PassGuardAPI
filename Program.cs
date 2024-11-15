@@ -90,7 +90,6 @@ app.UseMiddleware<RequestTimingMiddleware>();
 
 app.UseAuthentication();
 
-
 app.UseAuthorization();
 
 app.MapControllers();

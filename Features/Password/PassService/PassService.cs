@@ -37,12 +37,12 @@ namespace apief.Services
 
             foreach (var additionalField in passModel.additionalFields)
             {
+                additionalField.additionalId = new Guid();
                 additionalField.passwordId = passModel.passwordId;
                 _logger.LogInfo("Assigned password ID: {PasswordId} to additional field: {Title}", passModel.passwordId, additionalField.title);
             }
             try
             {
-
                 await _passwordRepository.AddAsync(passModel);
                 _logger.LogInfo("Password with ID: {PasswordId} successfully added to the database", passModel.passwordId);
             }
@@ -76,24 +76,27 @@ namespace apief.Services
                 _logger.LogWarning("Error occurred while fetching passwords for user with ID: {UserId}. Exception: {ExceptionMessage}", userId, ex.Message);
                 throw;
             }
-            var responseDto = passwords.Select(p => new PasswordResponsDto
-            {
-                id = p.id,
-                passwordId = p.passwordId,
-                categoryId = p.categoryId,
-                password = p.password,
-                organization = p.organization,
-                title = p.title,
-                createdTime = p.createdTime,
-                modifiedTime = p.modifiedTime,
-                additionalFields = p.additionalFields.Select(af => new AdditionalFieldDto
-                {
-                    title = af.title,
-                    value = af.value
-                }).ToList()
-            }).ToList();
+            // var response = _mapper.Map<PasswordResponsDto>(passwords);
+            // var responseDto = passwords.Select(p => new PasswordResponsDto
+            // {
+            //     id = p.id,
+            //     passwordId = p.passwordId,
+            //     categoryId = p.categoryId,
+            //     password = p.password,
+            //     organization = p.organization,
+            //     title = p.title,
+            //     createdTime = p.createdTime,
+            //     modifiedTime = p.modifiedTime,
+            //     additionalFields = p.additionalFields.Select(af => new AdditionalFieldDto
+            //     {
+            //         additionalId = af.additionalId,
+            //         title = af.title,
+            //         value = af.value
+            //     }).ToList()
+            // }).ToList();
 
-            return responseDto;
+            var response = _mapper.Map<List<PasswordResponsDto>>(passwords);
+            return response;
         }
 
 
@@ -118,7 +121,7 @@ namespace apief.Services
             existingPassword.title = userInput.title;
             existingPassword.modifiedTime = DateTime.UtcNow.ToString();
 
-            
+
 
             var existingAdditionalFields = existingPassword.additionalFields.ToList();
 
@@ -163,7 +166,7 @@ namespace apief.Services
 
             var responseDto = new PasswordDto
             {
-                passwordId= existingPassword.passwordId,
+                passwordId = existingPassword.passwordId,
                 password = existingPassword.password,
                 organization = existingPassword.organization,
                 title = existingPassword.title,

@@ -19,6 +19,7 @@ namespace apief
         public async Task AddAsync(Password password)
         {
             await _context.Passwords.AddAsync(password);
+
             await _context.SaveChangesAsync();
         }
 

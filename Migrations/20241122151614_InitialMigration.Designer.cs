@@ -12,8 +12,8 @@ using apief;
 namespace V2iSafe.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241005104443_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20241122151614_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,7 +21,7 @@ namespace V2iSafe.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("Dbo")
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -48,19 +48,66 @@ namespace V2iSafe.Migrations
                     b.ToTable("AdditionalFields", "Dbo");
                 });
 
-            modelBuilder.Entity("apief.Note", b =>
+            modelBuilder.Entity("apief.BankAccount", b =>
                 {
-                    b.Property<Guid?>("noteId")
+                    b.Property<Guid>("bankAccountId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("cardHolderName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("cardNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("categoryId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("createdTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("cvv")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("expirationDateTimeStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("modifiedTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("pin")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("bankAccountId");
+
+                    b.ToTable("BankAccounts", "Dbo");
+                });
+
+            modelBuilder.Entity("apief.Note", b =>
+                {
+                    b.Property<Guid>("noteId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("backgroundColorHex")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("categoryId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("createdTime")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("id")
+                    b.Property<Guid>("id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("lastEdit")
+                    b.Property<string>("modifiedTime")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("title")
@@ -77,13 +124,22 @@ namespace V2iSafe.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("categoryId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("createdTime")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("lastEdit")
+                    b.Property<string>("modifiedTime")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("organization")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("organizationLogo")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("password")
@@ -104,7 +160,6 @@ namespace V2iSafe.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("passwordHash")

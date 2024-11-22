@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace V2iSafe.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,15 +15,39 @@ namespace V2iSafe.Migrations
                 name: "Dbo");
 
             migrationBuilder.CreateTable(
+                name: "BankAccounts",
+                schema: "Dbo",
+                columns: table => new
+                {
+                    bankAccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    cardHolderName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    cardNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    expirationDateTimeStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    cvv = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    pin = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    createdTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    modifiedTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    categoryId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BankAccounts", x => x.bankAccountId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Note",
                 schema: "Dbo",
                 columns: table => new
                 {
                     noteId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    lastEdit = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    backgroundColorHex = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    createdTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    modifiedTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    categoryId = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -37,10 +61,13 @@ namespace V2iSafe.Migrations
                 {
                     passwordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    categoryId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     password = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     organization = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    organizationLogo = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     title = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    lastEdit = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    createdTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    modifiedTime = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -53,7 +80,7 @@ namespace V2iSafe.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     passwordHash = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -95,6 +122,10 @@ namespace V2iSafe.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AdditionalFields",
+                schema: "Dbo");
+
+            migrationBuilder.DropTable(
+                name: "BankAccounts",
                 schema: "Dbo");
 
             migrationBuilder.DropTable(

@@ -28,6 +28,11 @@ namespace apief
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("Dbo");
+            modelBuilder.Entity<BankAccount>(entity =>
+         {
+        entity.ToTable("BankAccounts");
+        entity.HasKey(b => b.bankAccountId); // Устанавливаем первичный ключ
+          });
 
             modelBuilder.Entity<User>()
                 .ToTable("User", "Dbo")
@@ -39,18 +44,18 @@ namespace apief
 
             modelBuilder.Entity<Password>()
          .ToTable("Password", "Dbo")
-         .HasKey(p => p.passwordId); 
+         .HasKey(p => p.passwordId);
 
             modelBuilder.Entity<AdditionalField>()
                 .ToTable("AdditionalFields", "Dbo")
-                .HasKey(a => a.additionalId); 
+                .HasKey(a => a.additionalId);
 
-         
+
             modelBuilder.Entity<Password>()
                 .HasMany(p => p.additionalFields)
                 .WithOne()
                 .HasForeignKey(a => a.passwordId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

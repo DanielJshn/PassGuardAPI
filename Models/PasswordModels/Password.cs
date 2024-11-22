@@ -2,8 +2,8 @@ namespace apief
 {
     public class Password
     {
-        public Guid id { get; set; } = Guid.NewGuid();
         public Guid passwordId { get; set; }
+        public Guid id { get; set; }
         public string? categoryId { get; set; }
         public string? password { get; set; }
         public string? organization { get; set; }

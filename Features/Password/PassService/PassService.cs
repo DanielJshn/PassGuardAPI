@@ -76,24 +76,7 @@ namespace apief.Services
                 _logger.LogWarning("Error occurred while fetching passwords for user with ID: {UserId}. Exception: {ExceptionMessage}", userId, ex.Message);
                 throw;
             }
-            // var response = _mapper.Map<PasswordResponsDto>(passwords);
-            // var responseDto = passwords.Select(p => new PasswordResponsDto
-            // {
-            //     id = p.id,
-            //     passwordId = p.passwordId,
-            //     categoryId = p.categoryId,
-            //     password = p.password,
-            //     organization = p.organization,
-            //     title = p.title,
-            //     createdTime = p.createdTime,
-            //     modifiedTime = p.modifiedTime,
-            //     additionalFields = p.additionalFields.Select(af => new AdditionalFieldDto
-            //     {
-            //         additionalId = af.additionalId,
-            //         title = af.title,
-            //         value = af.value
-            //     }).ToList()
-            // }).ToList();
+             
 
             var response = _mapper.Map<List<PasswordResponsDto>>(passwords);
             return response;

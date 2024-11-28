@@ -36,7 +36,6 @@ namespace apief
             {
                 throw new Exception("Note is not found");
             }
-            Console.WriteLine(result + " ww");
             return result;
         }
 

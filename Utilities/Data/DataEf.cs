@@ -15,6 +15,7 @@ namespace apief
         public DbSet<Password> Passwords { get; set; }
         public DbSet<AdditionalField> AdditionalFields { get; set; }
         public DbSet<Note> Notes { get; set; }
+        public DbSet<BankAccount> BankAccounts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

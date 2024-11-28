@@ -75,6 +75,9 @@ builder.Services.AddScoped<IPassService, PassService>();
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
 builder.Services.AddScoped<INoteService, NoteService>();
 
+builder.Services.AddScoped<IBankRepository, BankRepository>();
+builder.Services.AddScoped<IBankService, BankService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

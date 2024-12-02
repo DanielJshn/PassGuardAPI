@@ -47,7 +47,7 @@ namespace apief
         }
 
 
-        [HttpPut("bankAccountId")] // http://localhost:5115/Note/noteId?noteId= -> http://localhost:5115/Note?noteId=
+        [HttpPut("bankAccountId")]
         public async Task<IActionResult> PutBankAccount(Guid bankId, BankAccountUpdateDto bank)
         {
             try
@@ -63,6 +63,20 @@ namespace apief
             }
         }
 
+        [HttpDelete("bankAccountId")] 
+        public async Task<IActionResult> DeleteBankAccount(Guid bankId)
+        {
+            try
+            {
+                var identity = await _identity.GetUserByTokenAsync(User);
+                await _bankService.DeleteBankAccountAsync(bankId, identity.id);
+                return Ok(new ApiResponse(success: true, data: Ok()));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(success: false, message: ex.Message));
+            }
+        }
 
     }
 }

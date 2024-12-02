@@ -21,7 +21,7 @@ namespace apief
             bankModel.createdTime = DateTime.UtcNow.ToString();
             bankModel.modifiedTime = null;
 
-            await _bankRepository.AddBankDataAsync(bankModel);
+            await _bankRepository.AddBankAccountAsync(bankModel);
 
             return _mapper.Map<BankAccountResponseDto>(bankModel);
         }
@@ -29,7 +29,7 @@ namespace apief
 
         public async Task<List<BankAccountResponseDto>> GetBankAccountsAsync(Guid userId)
         {
-            var banks = await _bankRepository.GetBanksAsync(userId);
+            var banks = await _bankRepository.GetBankAccountsAsync(userId);
 
             if (banks == null || !banks.Any())
             {
@@ -58,9 +58,26 @@ namespace apief
             bank.modifiedTime = DateTime.UtcNow.ToString();
             bank.categoryId = bankAccountDto.categoryId;
             
-            await _bankRepository.UpdateAsync(bank);
+            await _bankRepository.UpdateBankAccountAsync(bank);
 
             return _mapper.Map<BankAccountResponseDto>(bank);
+        }
+
+
+        public async Task DeleteBankAccountAsync(Guid bankId, Guid userId)
+        {
+            
+
+            var existingNote = await _bankRepository.GetBankAccountByBankId(bankId);
+
+            if (existingNote == null)
+            {
+                throw new Exception("Note not found");
+            }
+
+            await _bankRepository.DeleteBankAccountAsync(bankId);
+
+           
         }
     }
 }

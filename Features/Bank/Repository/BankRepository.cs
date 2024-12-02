@@ -10,13 +10,13 @@ namespace apief
             _dataContext = dataContext;
         }
 
-        public async Task AddBankDataAsync(BankAccount bankAccount)
+        public async Task AddBankAccountAsync(BankAccount bankAccount)
         {
             await _dataContext.BankAccounts.AddAsync(bankAccount);
             await _dataContext.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<BankAccount>> GetBanksAsync(Guid userId)
+        public async Task<IEnumerable<BankAccount>> GetBankAccountsAsync(Guid userId)
         {
 
             return await _dataContext.BankAccounts
@@ -35,11 +35,24 @@ namespace apief
         }
 
 
-        public async Task UpdateAsync(BankAccount bankAccount)
+        public async Task UpdateBankAccountAsync(BankAccount bankAccount)
         {
             _dataContext.BankAccounts.Update(bankAccount);
 
             await _dataContext.SaveChangesAsync();
+        }
+
+
+        public async Task DeleteBankAccountAsync(Guid bankId)
+        {
+            var bank = await _dataContext.BankAccounts
+                .FirstOrDefaultAsync(p => p.bankAccountId == bankId);
+
+            if (bank != null)
+            {
+                _dataContext.BankAccounts.Remove(bank);
+                await _dataContext.SaveChangesAsync();
+            }
         }
     }
 }

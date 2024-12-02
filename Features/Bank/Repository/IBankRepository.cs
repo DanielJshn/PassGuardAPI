@@ -2,9 +2,10 @@ namespace apief
 {
     public interface IBankRepository
     {
-        Task AddBankDataAsync(BankAccount bankAccount);
-        Task<IEnumerable<BankAccount>> GetBanksAsync(Guid userId);
-        Task UpdateAsync(BankAccount bankAccount);
+        Task AddBankAccountAsync(BankAccount bankAccount);
+        Task<IEnumerable<BankAccount>> GetBankAccountsAsync(Guid userId);
         Task<BankAccount> GetBankAccountByBankId(Guid bankId);
+        Task UpdateBankAccountAsync(BankAccount bankAccount);
+        Task DeleteBankAccountAsync(Guid noteId);
     }
 }

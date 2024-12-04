@@ -22,6 +22,12 @@ namespace apief
             try
             {
                 var identity = await _identity.GetUserByTokenAsync(User);
+                
+                if (identity.id == Guid.Empty)
+                {
+                    return BadRequest(new ApiResponse(success: false, message: "Invalid user ID"));
+                }
+
                 var createdNote = await _notesService.CreateNoteAsync(noteDto, identity.id);
                 return Ok(new ApiResponse(success: true, data: createdNote));
             }

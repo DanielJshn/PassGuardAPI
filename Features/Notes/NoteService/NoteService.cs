@@ -28,9 +28,9 @@ namespace apief
             }
 
             var noteModel = _mapper.Map<Note>(noteDto);
-            noteModel.noteId = Guid.NewGuid();
             noteModel.id = userId;
-            noteModel.lastEdit = DateTime.UtcNow;
+            noteModel.createdTime = DateTime.UtcNow.ToString();
+            noteModel.modifiedTime = null;
 
             _logger.LogInfo("Creating note {NoteId} for user {UserId}.", noteModel.noteId, userId);
 
@@ -61,17 +61,17 @@ namespace apief
         }
 
 
-        public async Task<NoteResponseDto> UpdateNoteAsync(Guid noteId, NoteDto noteDto, Guid userId)
+        public async Task<NoteResponseDto> UpdateNoteAsync(Guid noteId, NoteUpdateDto noteDto, Guid userId)
         {
             _logger.LogInfo("Start updating note {NoteId} for user {UserId}.", noteId, userId);
-
-            var note = await _noteRepository.GetNoteByUserId(noteId);
+            
+            var note = await _noteRepository.GetNoteByNoteId(noteId);
             if (note == null)
             {
                 _logger.LogWarning("Note {NoteId} not found for user {UserId}.", noteId, userId);
                 throw new KeyNotFoundException($"Note with ID {noteId} not found.");
             }
-
+           
             if (string.IsNullOrWhiteSpace(noteDto.title))
             {
                 _logger.LogWarning("Failed to update note {NoteId} for user {UserId}: Title is required.", noteId, userId);
@@ -80,12 +80,14 @@ namespace apief
 
             note.title = noteDto.title;
             note.description = noteDto.description;
-            note.lastEdit = DateTime.UtcNow;
-
+            note.backgroundColorHex = noteDto.backgroundColorHex;
+            note.modifiedTime = DateTime.UtcNow.ToString();
+            note.categoryId = noteDto.categoryId;
+            
             _logger.LogInfo("Updating note {NoteId} for user {UserId}.", note.noteId, userId);
 
             await _noteRepository.UpdateAsync(note);
-
+            
             _logger.LogInfo("Note {NoteId} updated successfully for user {UserId}.", note.noteId, userId);
 
             return _mapper.Map<NoteResponseDto>(note);
@@ -96,7 +98,7 @@ namespace apief
         {
             _logger.LogInfo("Start deleting note with ID: {NoteId} for user: {UserId}.", noteId, userId);
 
-            var existingNote = await _noteRepository.GetNoteByUserId(noteId);
+            var existingNote = await _noteRepository.GetNoteByNoteId(noteId);
 
             if (existingNote == null)
             {

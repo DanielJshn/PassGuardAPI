@@ -17,7 +17,7 @@ namespace apief
 
         private const int REQUIRED_USER_PASSWORD_LENGTH = 8;
 
-        public async Task CheckUserExistsAsync(userForRegistration userForRegistration)
+        public async Task CheckUserExistsAsync(UserForRegistration userForRegistration)
         {
             _logger.LogInfo("Checking if email exists for user: {Email}", userForRegistration.email);
             bool userExists = await CheckEmailExistsAsync(userForRegistration.email);
@@ -39,7 +39,7 @@ namespace apief
         }
 
 
-        public async Task CheckEmailAsync(userForRegistration userForLogin)
+        public async Task CheckEmailAsync(UserForRegistration userForLogin)
         {
             _logger.LogInfo("Checking if email exists for login: {Email}", userForLogin.email);
             bool userExists = await CheckEmailExistsAsync(userForLogin.email);
@@ -52,7 +52,7 @@ namespace apief
         }
 
 
-        public Task ValidateRegistrationDataAsync(userForRegistration userForRegistration)
+        public Task ValidateRegistrationDataAsync(UserForRegistration userForRegistration)
         {
             _logger.LogInfo("Validating registration data for user: {Email}", userForRegistration.email);
 
@@ -83,7 +83,7 @@ namespace apief
         }
 
 
-        public async Task CheckPasswordAsync(userForRegistration userForLogin)
+        public async Task CheckPasswordAsync(UserForRegistration userForLogin)
         {
             _logger.LogInfo("Checking password for user: {Email}", userForLogin.email);
             User? user = await _authRepository.GetUserByEmailAsync(userForLogin.email);
@@ -104,7 +104,7 @@ namespace apief
         }
 
 
-        public async Task<string> GenerateTokenAsync(userForRegistration userForRegistration)
+        public async Task<string> GenerateTokenAsync(UserForRegistration userForRegistration)
         {
 
             _logger.LogInfo("Generating token for user: {Email}", userForRegistration.email);
@@ -125,7 +125,7 @@ namespace apief
         }
 
 
-        public Task<string> GenerateTokenForLogin(userForRegistration userAuthDto)
+        public Task<string> GenerateTokenForLogin(UserForRegistration userAuthDto)
         {
             _logger.LogInfo("Generating token for login: {Email}", userAuthDto.email);
             string email = userAuthDto.email;
@@ -144,8 +144,16 @@ namespace apief
 
         public async Task DeleteAllDataByUserId(Guid userId)
         {
-           await _authRepository.DeleteData(userId);
-        }
+            try
+            {
+                await _authRepository.DeleteData(userId);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning($"An error occurred while deleting data for user with ID: {userId}");
 
+                throw new ApplicationException($"Error deleting data for user with ID: {userId}", ex);
+            }
+        }
     }
 }

@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 
 namespace apief
 {
-    public class Crypted
+    public class EncryptionUtils 
     {
         public string DecryptStringAES(string cipherText, string key, string iv)
         {

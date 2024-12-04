@@ -1,8 +1,10 @@
 using System.Text;
+using System.Text.Json;
 using apief;
 using apief.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using testProd.auth;
 
@@ -25,9 +27,30 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters()
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKeyString)),
-            ValidateIssuer = false,
-            ValidateAudience = false
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:TokenKey"])),
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["JwtSettings:ValidIssuer"],
+            ValidAudience = builder.Configuration["JwtSettings:ValidAudience"],
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                if (context.Exception is SecurityTokenExpiredException)
+                {
+                    var apiResponse = new ApiResponse(success: false, message: "Token has expired");
+                    var jsonResponse = JsonSerializer.Serialize(apiResponse); 
+
+                    context.Response.StatusCode = 401;
+                    context.Response.ContentType = "application/json";
+                    return context.Response.WriteAsync(jsonResponse); 
+                }
+
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -36,7 +59,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddLogging();
 builder.Services.AddSingleton<KeyConfig>();
-builder.Services.AddScoped<Crypted>();
+builder.Services.AddScoped<EncryptionUtils>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<ILog, Log>();
@@ -52,12 +75,15 @@ builder.Services.AddScoped<IPassService, PassService>();
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
 builder.Services.AddScoped<INoteService, NoteService>();
 
+builder.Services.AddScoped<IBankRepository, BankRepository>();
+builder.Services.AddScoped<IBankService, BankService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    
+
     app.UseSwaggerUI();
 }
 

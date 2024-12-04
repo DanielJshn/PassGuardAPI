@@ -17,11 +17,17 @@ namespace apief
         public async Task<User> GetUserByTokenAsync(ClaimsPrincipal userClaims)
         {
             _logger.LogInfo("Attempting to extract email from token claims...");
-
+            
             var email = userClaims.FindFirstValue(ClaimTypes.Email) ?? userClaims.FindFirst("email")?.Value;
+            Console.WriteLine("Extracted email: " + email);
+
 
             if (email == null)
             {
+                foreach (var claim in userClaims.Claims)
+                {
+                    Console.WriteLine($"Type: {claim.Type}, Value: {claim.Value}");
+                }
                 _logger.LogWarning("Email not found in token claims.");
                 throw new UnauthorizedAccessException("User email not found in token.");
             }

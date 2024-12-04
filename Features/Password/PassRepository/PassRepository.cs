@@ -19,10 +19,16 @@ namespace apief
         public async Task AddAsync(Password password)
         {
             await _context.Passwords.AddAsync(password);
+
             await _context.SaveChangesAsync();
         }
 
+        public async Task UpdateAsync(Password password)
+        {
+            _context.Passwords.Update(password);
 
+            await _context.SaveChangesAsync();
+        }
         public async Task<List<Password>> GetAllPasswordsByUserIdAsync(Guid userId)
         {
             return await _context.Passwords
@@ -62,7 +68,7 @@ namespace apief
             if (password != null)
             {
                 _context.Passwords.Remove(password);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
             }
         }
     }

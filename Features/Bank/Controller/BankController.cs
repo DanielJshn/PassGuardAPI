@@ -4,26 +4,25 @@ namespace apief
 {
     [ApiController]
     [Route("[controller]")]
-    public class NoteController : ControllerBase
+    public class BankController : ControllerBase
     {
-        private readonly INoteService _notesService;
         private readonly IIdentityUser _identity;
-
-        public NoteController(INoteService noteService, IIdentityUser identityUser)
+        private readonly IBankService _bankService;
+        public BankController(IIdentityUser identity, IBankService bankService)
         {
-            _notesService = noteService;
-            _identity = identityUser;
+            _identity = identity;
+            _bankService = bankService;
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> PostNote(NoteDto noteDto)
+        public async Task<IActionResult> PostBankAccount(BankAccountDto bankDto)
         {
             try
             {
                 var identity = await _identity.GetUserByTokenAsync(User);
-                var createdNote = await _notesService.CreateNoteAsync(noteDto, identity.id);
-                return Ok(new ApiResponse(success: true, data: createdNote));
+                var createdBankAccount = await _bankService.CreateBancAccountAsync(bankDto, identity.id);
+                return Ok(new ApiResponse(success: true, data: createdBankAccount));
             }
             catch (Exception ex)
             {
@@ -33,13 +32,13 @@ namespace apief
 
 
         [HttpGet]
-        public async Task<IActionResult> GetNote()
+        public async Task<IActionResult> GetBankAccounts()
         {
             try
             {
                 var identity = await _identity.GetUserByTokenAsync(User);
-                var response = await _notesService.GetNotesAsync(identity.id);
-                return Ok(new ApiResponse(success: true, data: response));
+                var getBankAccountsData = await _bankService.GetBankAccountsAsync(identity.id);
+                return Ok(new ApiResponse(success: true, data: getBankAccountsData));
             }
             catch (Exception ex)
             {
@@ -48,14 +47,14 @@ namespace apief
         }
 
 
-        [HttpPut("noteId")]
-        public async Task<IActionResult> PutNote(Guid noteId, NoteDto note)
+        [HttpPut("bankAccountId")]
+        public async Task<IActionResult> PutBankAccount(Guid bankId, BankAccountUpdateDto bank)
         {
             try
             {
                 var identity = await _identity.GetUserByTokenAsync(User);
-                var updateNote = await _notesService.UpdateNoteAsync(noteId, note, identity.id);
-                return Ok(new ApiResponse(success: true, data: updateNote));
+                var updateBankAccount = await _bankService.UpdateBankAccountAsync(bankId, bank, identity.id);
+                return Ok(new ApiResponse(success: true, data: updateBankAccount));
 
             }
             catch (Exception ex)
@@ -64,14 +63,13 @@ namespace apief
             }
         }
 
-
-        [HttpDelete("noteId")]
-        public async Task<IActionResult> DeleteNote(Guid noteId)
+        [HttpDelete("bankAccountId")] 
+        public async Task<IActionResult> DeleteBankAccount(Guid bankId)
         {
             try
             {
                 var identity = await _identity.GetUserByTokenAsync(User);
-                await _notesService.DeleteNoteAsync(noteId, identity.id);
+                await _bankService.DeleteBankAccountAsync(bankId, identity.id);
                 return Ok(new ApiResponse(success: true, data: Ok()));
             }
             catch (Exception ex)
@@ -79,5 +77,6 @@ namespace apief
                 return BadRequest(new ApiResponse(success: false, message: ex.Message));
             }
         }
+
     }
 }

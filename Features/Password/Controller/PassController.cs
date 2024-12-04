@@ -28,6 +28,7 @@ namespace apief
                 }
                 var identity = await _identity.GetUserByTokenAsync(User);
                 var createdPassword = await _passwordService.CreateAsync(password, identity.id);
+                Console.WriteLine(createdPassword);
                 return Ok(new ApiResponse(success: true, data: createdPassword));
             }
             catch (Exception ex)
@@ -53,8 +54,8 @@ namespace apief
         }
 
 
-        [HttpPut("{passwordId}")]
-        public async Task<IActionResult> UpdatePassword(Guid passwordId, [FromBody] PasswordDto dataInput)
+        [HttpPut("{passwordId}")] //to query
+        public async Task<IActionResult> UpdatePassword(Guid passwordId, [FromBody] PasswordForUpdateDto dataInput)
         {
             try
             {

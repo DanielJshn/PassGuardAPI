@@ -29,9 +29,11 @@ namespace testProd.auth
         {
             var user = await _dataContext.Users
                  .FirstOrDefaultAsync(p => p.id == userId);
-
-            _dataContext.Users.Remove(user);
-            await _dataContext.SaveChangesAsync();
+            if (user != null)
+            {
+                _dataContext.Users.Remove(user);
+                await _dataContext.SaveChangesAsync();
+            }
         }
     }
 }

@@ -6,10 +6,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using testProd.auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var redisConnection = builder.Configuration.GetSection("Redis:ConnectionString").Value;
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnection));
 
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -42,11 +45,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 if (context.Exception is SecurityTokenExpiredException)
                 {
                     var apiResponse = new ApiResponse(success: false, message: "Token has expired");
-                    var jsonResponse = JsonSerializer.Serialize(apiResponse); 
+                    var jsonResponse = JsonSerializer.Serialize(apiResponse);
 
                     context.Response.StatusCode = 401;
                     context.Response.ContentType = "application/json";
-                    return context.Response.WriteAsync(jsonResponse); 
+                    return context.Response.WriteAsync(jsonResponse);
                 }
 
                 return Task.CompletedTask;
@@ -77,6 +80,8 @@ builder.Services.AddScoped<INoteService, NoteService>();
 
 builder.Services.AddScoped<IBankRepository, BankRepository>();
 builder.Services.AddScoped<IBankService, BankService>();
+
+builder.Services.AddScoped<ICacheService, CacheService>();
 
 var app = builder.Build();
 

@@ -38,7 +38,12 @@ namespace apief
 
             await _noteRepository.AddAsync(noteModel);
 
-            await _cacheService.RemoveAsync($"notes_{userId}");
+            string cacheKey = $"notes_{userId}";
+
+            var notes = await _noteRepository.GetNotesAsync(userId);
+
+            var noteDtos = _mapper.Map<List<NoteResponseDto>>(notes);
+            await _cacheService.SetAsync(cacheKey, noteDtos, TimeSpan.FromMinutes(10));
 
             _logger.LogInfo("Note {NoteId} created successfully for user {UserId}.", noteModel.noteId, userId);
 
@@ -104,6 +109,14 @@ namespace apief
 
             await _noteRepository.UpdateAsync(note);
 
+            string cacheKey = $"notes_{userId}";
+            await _cacheService.RemoveAsync(cacheKey);
+
+            var updatedNotes = await _noteRepository.GetNotesAsync(userId);
+            var noteDtos = _mapper.Map<List<NoteResponseDto>>(updatedNotes);
+
+            await _cacheService.SetAsync(cacheKey, noteDtos, TimeSpan.FromMinutes(10));
+
             _logger.LogInfo("Note {NoteId} updated successfully for user {UserId}.", note.noteId, userId);
 
             return _mapper.Map<NoteResponseDto>(note);
@@ -123,6 +136,10 @@ namespace apief
             }
 
             await _noteRepository.DeleteNoteAsync(noteId);
+
+            string cacheKey = $"notes_{userId}";
+
+            await _cacheService.RemoveAsync(cacheKey);
 
             _logger.LogInfo("Note with ID: {NoteId} successfully deleted for user: {UserId}.", noteId, userId);
         }

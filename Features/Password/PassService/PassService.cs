@@ -166,9 +166,9 @@ namespace apief.Services
         {
             existingPassword.categoryId = userInput.categoryId;
             existingPassword.password = userInput.password;
-            existingPassword.organization = userInput.organization;
-            existingPassword.organizationLogo = userInput.organizationLogo;
             existingPassword.title = userInput.title;
+            existingPassword.organizationLogo = userInput.organizationLogo;
+            existingPassword.userName = userInput.userName;
             existingPassword.modifiedTime = DateTime.UtcNow.ToString();
         }
 

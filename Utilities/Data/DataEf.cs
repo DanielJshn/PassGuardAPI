@@ -32,7 +32,7 @@ namespace apief
             modelBuilder.Entity<BankAccount>(entity =>
          {
         entity.ToTable("BankAccounts");
-        entity.HasKey(b => b.bankAccountId); // Устанавливаем первичный ключ
+        entity.HasKey(b => b.bankAccountId); 
           });
 
             modelBuilder.Entity<User>()

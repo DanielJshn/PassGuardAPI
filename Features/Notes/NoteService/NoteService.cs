@@ -8,12 +8,14 @@ namespace apief
         private readonly INoteRepository _noteRepository;
         private readonly IMapper _mapper;
         private readonly ILog _logger;
+        private readonly ICacheService _cacheService;
 
-        public NoteService(INoteRepository noteRepository, IMapper mapper, ILog logger)
+        public NoteService(INoteRepository noteRepository, IMapper mapper, ILog logger, ICacheService cacheService)
         {
             _noteRepository = noteRepository;
             _mapper = mapper;
             _logger = logger;
+            _cacheService = cacheService;
         }
 
 
@@ -36,6 +38,13 @@ namespace apief
 
             await _noteRepository.AddAsync(noteModel);
 
+            string cacheKey = $"notes_{userId}";
+
+            var notes = await _noteRepository.GetNotesAsync(userId);
+
+            var noteDtos = _mapper.Map<List<NoteResponseDto>>(notes);
+            await _cacheService.SetAsync(cacheKey, noteDtos, TimeSpan.FromMinutes(10));
+
             _logger.LogInfo("Note {NoteId} created successfully for user {UserId}.", noteModel.noteId, userId);
 
             return _mapper.Map<NoteResponseDto>(noteModel);
@@ -46,8 +55,16 @@ namespace apief
         {
             _logger.LogInfo("Start retrieving notes for user {UserId}.", userId);
 
+            string cacheKey = $"notes_{userId}";
+
+            var cachedNotes = await _cacheService.GetAsync<List<NoteResponseDto>>(cacheKey);
+            if (cachedNotes != null)
+            {
+                _logger.LogInfo("Returning cached notes for user {UserId}.", userId);
+                return cachedNotes;
+            }
+
             var notes = await _noteRepository.GetNotesAsync(userId);
-            var noteCount = notes.Count();
 
             if (notes == null || !notes.Any())
             {
@@ -55,23 +72,27 @@ namespace apief
                 return new List<NoteResponseDto>();
             }
 
-            _logger.LogInfo("{NoteCount} notes retrieved successfully for user {UserId}.", noteCount, userId);
+            var noteDtos = _mapper.Map<List<NoteResponseDto>>(notes);
 
-            return _mapper.Map<List<NoteResponseDto>>(notes);
+            await _cacheService.SetAsync(cacheKey, noteDtos, TimeSpan.FromMinutes(10));
+
+            _logger.LogInfo("{NoteCount} notes retrieved successfully for user {UserId}.", noteDtos.Count, userId);
+
+            return noteDtos;
         }
 
 
         public async Task<NoteResponseDto> UpdateNoteAsync(Guid noteId, NoteUpdateDto noteDto, Guid userId)
         {
             _logger.LogInfo("Start updating note {NoteId} for user {UserId}.", noteId, userId);
-            
+
             var note = await _noteRepository.GetNoteByNoteId(noteId);
             if (note == null)
             {
                 _logger.LogWarning("Note {NoteId} not found for user {UserId}.", noteId, userId);
                 throw new KeyNotFoundException($"Note with ID {noteId} not found.");
             }
-           
+
             if (string.IsNullOrWhiteSpace(noteDto.title))
             {
                 _logger.LogWarning("Failed to update note {NoteId} for user {UserId}: Title is required.", noteId, userId);
@@ -83,11 +104,19 @@ namespace apief
             note.backgroundColorHex = noteDto.backgroundColorHex;
             note.modifiedTime = DateTime.UtcNow.ToString();
             note.categoryId = noteDto.categoryId;
-            
+
             _logger.LogInfo("Updating note {NoteId} for user {UserId}.", note.noteId, userId);
 
             await _noteRepository.UpdateAsync(note);
-            
+
+            string cacheKey = $"notes_{userId}";
+            await _cacheService.RemoveAsync(cacheKey);
+
+            var updatedNotes = await _noteRepository.GetNotesAsync(userId);
+            var noteDtos = _mapper.Map<List<NoteResponseDto>>(updatedNotes);
+
+            await _cacheService.SetAsync(cacheKey, noteDtos, TimeSpan.FromMinutes(10));
+
             _logger.LogInfo("Note {NoteId} updated successfully for user {UserId}.", note.noteId, userId);
 
             return _mapper.Map<NoteResponseDto>(note);
@@ -107,6 +136,10 @@ namespace apief
             }
 
             await _noteRepository.DeleteNoteAsync(noteId);
+
+            string cacheKey = $"notes_{userId}";
+
+            await _cacheService.RemoveAsync(cacheKey);
 
             _logger.LogInfo("Note with ID: {NoteId} successfully deleted for user: {UserId}.", noteId, userId);
         }

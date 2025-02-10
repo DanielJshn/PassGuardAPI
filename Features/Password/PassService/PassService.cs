@@ -14,12 +14,14 @@ namespace apief.Services
         private readonly IPassRepository _passwordRepository;
         private readonly IMapper _mapper;
         private readonly ILog _logger;
+        private readonly ICacheService _cacheService;
 
-        public PassService(IPassRepository passwordRepository, IMapper mapper, ILog logger)
+        public PassService(IPassRepository passwordRepository, IMapper mapper, ILog logger, ICacheService cacheService)
         {
             _passwordRepository = passwordRepository;
             _mapper = mapper;
             _logger = logger;
+            _cacheService = cacheService;
         }
 
 
@@ -37,7 +39,7 @@ namespace apief.Services
 
             foreach (var additionalField in passModel.additionalFields)
             {
-                additionalField.additionalId = new Guid();
+                additionalField.additionalId = Guid.NewGuid();
                 additionalField.passwordId = passModel.passwordId;
                 _logger.LogInfo("Assigned password ID: {PasswordId} to additional field: {Title}", passModel.passwordId, additionalField.title);
             }
@@ -53,7 +55,12 @@ namespace apief.Services
             }
 
             var responseDto = _mapper.Map<PasswordDto>(passModel);
-            _logger.LogInfo("Password with ID: {PasswordId} successfully mapped to DTO");
+
+            string cacheKey = $"passwords_{userId}";
+
+            await _cacheService.RemoveAsync(cacheKey);
+
+            _logger.LogInfo("Cache for user {UserId} removed after password creation.", userId);
 
             return responseDto;
         }
@@ -63,22 +70,33 @@ namespace apief.Services
         {
             _logger.LogInfo("Fetching all passwords for user with ID: {UserId}", userId);
 
+            string cacheKey = $"passwords_{userId}";
+
+            var cachedPasswords = await _cacheService.GetAsync<List<PasswordResponsDto>>(cacheKey);
+            if (cachedPasswords != null)
+            {
+                _logger.LogInfo("Returning cached passwords for user with ID: {UserId}", userId);
+                return cachedPasswords;
+            }
+
             List<Password> passwords;
 
             try
             {
                 passwords = await _passwordRepository.GetAllPasswordsByUserIdAsync(userId);
                 _logger.LogInfo("Successfully fetched {PasswordCount} passwords for user with ID: {UserId}", passwords.Count, userId);
-
             }
             catch (Exception ex)
             {
                 _logger.LogWarning("Error occurred while fetching passwords for user with ID: {UserId}. Exception: {ExceptionMessage}", userId, ex.Message);
                 throw;
             }
-             
 
             var response = _mapper.Map<List<PasswordResponsDto>>(passwords);
+
+            await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(30));
+            _logger.LogInfo("Cached passwords for user with ID: {UserId} for 30 minutes", userId);
+
             return response;
         }
 
@@ -97,71 +115,20 @@ namespace apief.Services
 
             _logger.LogInfo("Password found for ID: {PasswordId}. Updating fields.", passwordId);
 
-            existingPassword.categoryId = userInput.categoryId;
-            existingPassword.password = userInput.password;
-            existingPassword.organization = userInput.organization;
-            existingPassword.organizationLogo = userInput.organizationLogo;
-            existingPassword.title = userInput.title;
-            existingPassword.modifiedTime = DateTime.UtcNow.ToString();
+            UpdatePasswordFields(existingPassword, userInput);
 
+            await UpdateAdditionalFields(existingPassword, userInput);
 
-
-            var existingAdditionalFields = existingPassword.additionalFields.ToList();
-
-            var fieldsToRemove = existingAdditionalFields
-                .Where(f => !userInput.additionalFields.Any(dto => dto.additionalId == f.additionalId))
-                .ToList();
-
-            if (fieldsToRemove.Any())
-            {
-                _logger.LogInfo("Removing {FieldCount} additional fields from password with ID: {PasswordId}", fieldsToRemove.Count, passwordId);
-                await _passwordRepository.RemoveAdditionalFieldsAsync(fieldsToRemove);
-            }
-
-            foreach (var fieldDto in userInput.additionalFields)
-            {
-                var existingField = existingAdditionalFields
-                    .FirstOrDefault(f => f.additionalId == fieldDto.additionalId);
-
-                if (existingField != null)
-                {
-                    _logger.LogInfo("Updating additional field with ID: {FieldId} for password ID: {PasswordId}", fieldDto.additionalId, passwordId);
-                    existingField.title = fieldDto.title;
-                    existingField.value = fieldDto.value;
-                }
-                else
-                {
-                    _logger.LogInfo("Adding new additional field for password ID: {PasswordId}", passwordId);
-                    var newField = new AdditionalField
-                    {
-                        passwordId = existingPassword.passwordId,
-                        additionalId = Guid.NewGuid(),
-                        title = fieldDto.title,
-                        value = fieldDto.value
-                    };
-
-                    await _passwordRepository.AddAdditionalFieldAsync(newField);
-                }
-            }
             await _passwordRepository.UpdateAsync(existingPassword);
-
             _logger.LogInfo("Saving changes to the database for password ID: {PasswordId}", passwordId);
 
-            var responseDto = new PasswordDto
-            {
-                passwordId = existingPassword.passwordId,
-                password = existingPassword.password,
-                organization = existingPassword.organization,
-                title = existingPassword.title,
-                createdTime = existingPassword.createdTime,
-                modifiedTime = existingPassword.modifiedTime,
-                categoryId = existingPassword.categoryId,
-                additionalFields = userInput.additionalFields
-            };
+            var cacheKey = $"passwords:{userId}";
 
-            _logger.LogInfo("Password with ID: {PasswordId} successfully updated for user: {UserId}", passwordId, userId);
+            await _cacheService.RemoveAsync(cacheKey);
 
-            return responseDto;
+            _logger.LogInfo("Cache invalidated for key: {CacheKey}", cacheKey);
+
+            return _mapper.Map<PasswordDto>(existingPassword);
         }
 
 
@@ -180,11 +147,69 @@ namespace apief.Services
             {
                 await _passwordRepository.DeletePasswordDataAsync(passwordId);
                 _logger.LogInfo("Successfully deleted password with ID: {PasswordId}", passwordId);
+
+                var cacheKey = $"passwords:{userId}";
+
+                await _cacheService.RemoveAsync(cacheKey);
+                
+                _logger.LogInfo("Cache invalidated for key: {CacheKey}", cacheKey);
             }
             catch (Exception ex)
             {
                 _logger.LogInfo("Error occurred while deleting password with ID: {PasswordId}. Exception: {ExceptionMessage}", passwordId, ex.Message);
                 throw new Exception("Error occurred while deleting the password.");
+            }
+        }
+
+
+        private void UpdatePasswordFields(Password existingPassword, PasswordForUpdateDto userInput)
+        {
+            existingPassword.categoryId = userInput.categoryId;
+            existingPassword.password = userInput.password;
+            existingPassword.organization = userInput.organization;
+            existingPassword.organizationLogo = userInput.organizationLogo;
+            existingPassword.title = userInput.title;
+            existingPassword.modifiedTime = DateTime.UtcNow.ToString();
+        }
+
+
+        private async Task UpdateAdditionalFields(Password existingPassword, PasswordForUpdateDto userInput)
+        {
+            var existingAdditionalFields = existingPassword.additionalFields.ToList();
+
+            var fieldsToRemove = existingAdditionalFields
+                .Where(f => !userInput.additionalFields.Any(dto => dto.additionalId == f.additionalId))
+                .ToList();
+
+            if (fieldsToRemove.Any())
+            {
+                _logger.LogInfo("Removing {FieldCount} additional fields from password with ID: {PasswordId}", fieldsToRemove.Count, existingPassword.passwordId);
+                await _passwordRepository.RemoveAdditionalFieldsAsync(fieldsToRemove);
+            }
+
+            foreach (var fieldDto in userInput.additionalFields)
+            {
+                var existingField = existingAdditionalFields.FirstOrDefault(f => f.additionalId == fieldDto.additionalId);
+
+                if (existingField != null)
+                {
+                    _logger.LogInfo("Updating additional field with ID: {FieldId} for password ID: {PasswordId}", fieldDto.additionalId, existingPassword.passwordId);
+                    existingField.title = fieldDto.title;
+                    existingField.value = fieldDto.value;
+                }
+                else
+                {
+                    _logger.LogInfo("Adding new additional field for password ID: {PasswordId}", existingPassword.passwordId);
+                    var newField = new AdditionalField
+                    {
+                        passwordId = existingPassword.passwordId,
+                        additionalId = Guid.NewGuid(),
+                        title = fieldDto.title,
+                        value = fieldDto.value
+                    };
+
+                    await _passwordRepository.AddAdditionalFieldAsync(newField);
+                }
             }
         }
     }

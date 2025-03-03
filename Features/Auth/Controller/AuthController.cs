@@ -109,7 +109,7 @@ namespace apief
             return Ok(new ApiResponse(success: true, data: new { Token = newToken }));
         }
 
-
+        [Authorize]
         [HttpDelete("deleteAllData")] 
         public async Task<IActionResult> DeletedAllData()
         {

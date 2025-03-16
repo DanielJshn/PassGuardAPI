@@ -50,8 +50,8 @@ namespace apief
             var okResult = Assert.IsType<OkObjectResult>(result);
             var apiResponse = Assert.IsType<ApiResponse>(okResult.Value);
 
-            Assert.True(apiResponse.Success);
-            Assert.Equal(createdNoteResponse, apiResponse.Data);
+            Assert.True(apiResponse.success);
+            Assert.Equal(createdNoteResponse, apiResponse.data);
         }
 
         [Fact]
@@ -83,8 +83,8 @@ namespace apief
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
             var apiResponse = Assert.IsType<ApiResponse>(badRequestResult.Value);
 
-            Assert.False(apiResponse.Success);
-            Assert.Equal("Invalid user ID", apiResponse.Message); // Проверяем сообщение об ошибке
+            Assert.False(apiResponse.success);
+            Assert.Equal("Invalid user ID", apiResponse.message); // Проверяем сообщение об ошибке
         }
 
 

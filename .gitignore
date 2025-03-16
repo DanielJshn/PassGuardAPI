@@ -8,3 +8,5 @@ appsettings.json
 appsettings.Development.json
 
 Key.cs
+
+secureSettings.json

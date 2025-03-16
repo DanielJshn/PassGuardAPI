@@ -2,15 +2,15 @@ namespace apief
 {
     public class ApiResponse
     {
-        public bool Success { get; set; }
-        public string? Message { get; set; }
-        public object? Data { get; set; }
+        public bool success { get; set; }
+        public string? message { get; set; }
+        public object? data { get; set; }
 
         public ApiResponse(bool success, string? message = null, object? data = null)
         {
-            Success = success;
-            Message = message;
-            Data = data;
+            this.success = success;
+            this.message = message;
+            this.data = data;
         }
     }
 }

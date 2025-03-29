@@ -17,7 +17,9 @@ namespace apief
         {
           var userModel = _mapper.Map<UserData>(userDto);
           userModel.id = Guid.NewGuid();
+          
           await _authRepository.AddUserDataAsync(userModel);
+          
           return userModel;
         }
     }

@@ -20,7 +20,7 @@ namespace apief
             try
             {
                 var result = await _authService.CreateNewAccountAsync(userDataRegistrationDto);
-                return Ok(new ApiResponse(success: true, data: result));
+                return Ok(new ApiResponse(success: true,  data: null));
             }
             catch (Exception ex)
             {

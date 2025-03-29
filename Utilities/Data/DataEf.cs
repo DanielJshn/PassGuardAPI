@@ -11,7 +11,8 @@ namespace apief
             _config = config;
         }
 
-        public DbSet<User> Users { get; set; }
+        public DbSet<UserData> UserDatas { get; set; }
+        
         public DbSet<Password> Passwords { get; set; }
         public DbSet<AdditionalField> AdditionalFields { get; set; }
         public DbSet<Note> Notes { get; set; }
@@ -35,9 +36,7 @@ namespace apief
         entity.HasKey(b => b.bankAccountId); 
           });
 
-            modelBuilder.Entity<User>()
-                .ToTable("User", "Dbo")
-                .HasKey(u => u.id);
+            
 
             modelBuilder.Entity<Note>()
                 .ToTable("Note", "Dbo")

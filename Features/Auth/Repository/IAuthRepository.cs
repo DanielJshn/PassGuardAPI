@@ -2,8 +2,8 @@ namespace apief
 {
     public interface IAuthRepository
     {
-        Task<User?> GetUserByEmailAsync(string email);
-        Task AddUserAsync(User user);
+        Task<UserData?> GetUserByEmailAsync(string email);
+        Task AddUserAsync(UserData user);
         Task DeleteData(Guid userId);
     }
 }

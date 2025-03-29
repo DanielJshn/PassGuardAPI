@@ -12,26 +12,26 @@ namespace testProd.auth
             _dataContext = dataContext;
         }
 
-        public async Task<User?> GetUserByEmailAsync(string email)
+        public async Task<UserData> GetUserByEmailAsync(string email)
         {
-            return await _dataContext.Users.FirstOrDefaultAsync(u => u.email == email);
+            return await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.email == email);
         }
 
 
-        public async Task AddUserAsync(User user)
+        public async Task AddUserAsync(UserData user)
         {
-            await _dataContext.Users.AddAsync(user);
+            await _dataContext.UserDatas.AddAsync(user);
             await _dataContext.SaveChangesAsync();
         }
 
 
         public async Task DeleteData(Guid userId)
         {
-            var user = await _dataContext.Users
+            var user = await _dataContext.UserDatas
                  .FirstOrDefaultAsync(p => p.id == userId);
             if (user != null)
             {
-                _dataContext.Users.Remove(user);
+                _dataContext.UserDatas.Remove(user);
                 await _dataContext.SaveChangesAsync();
             }
         }

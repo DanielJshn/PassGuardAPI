@@ -12,21 +12,34 @@ namespace apief
         {
             _authService = authService;
         }
+
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserDataRegistrationDto userDataRegistrationDto)
         {
-            
             try
             {
                 var result = await _authService.CreateNewAccountAsync(userDataRegistrationDto);
-                return Ok(new ApiResponse(success: true,  data: null));
+                return Ok(new ApiResponse(true, data: result));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ApiResponse(false, ex.Message));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new ApiResponse(false, ex.Message));
             }
             catch (Exception ex)
             {
-                return BadRequest(new ApiResponse(success: false, message: ex.Message));
+
+                return StatusCode(500, new ApiResponse(false, ex.Message));
             }
-            
         }
+
+
+
+
+        
     }
 }

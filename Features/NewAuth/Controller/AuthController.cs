@@ -26,20 +26,11 @@ namespace apief
             {
                 return BadRequest(new ApiResponse(false, ex.Message));
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new ApiResponse(false, ex.Message));
-            }
             catch (Exception ex)
             {
-
                 return StatusCode(500, new ApiResponse(false, ex.Message));
             }
         }
-
-
-
-
-        
+ 
     }
 }

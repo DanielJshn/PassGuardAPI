@@ -13,12 +13,8 @@ namespace apief
 
         public async Task AddUserDataAsync(UserData userData)
         {
-
-
             await _dataContext.UserDatas.AddAsync(userData);
             await _dataContext.SaveChangesAsync();
-
-
         }
             
       

@@ -17,7 +17,7 @@ namespace apief
             await _dataContext.SaveChangesAsync();
         }
             
-      
+    
         public async Task<UserData?> GetUserByEmailAsync(string email)
         {
             return await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.email == email);

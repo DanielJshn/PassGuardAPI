@@ -6,7 +6,7 @@
 
 appsettings.json
 appsettings.Development.json
-
+/.vscode/
 Key.cs
 
 secureSettings.json

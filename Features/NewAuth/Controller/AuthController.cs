@@ -8,8 +8,10 @@ namespace apief
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly IVerifyService _verifyService;
+        public AuthController(IAuthService authService, IVerifyService verifyService)
         {
+            _verifyService = verifyService;
             _authService = authService;
         }
 
@@ -20,6 +22,7 @@ namespace apief
             try
             {
                 var result = await _authService.CreateNewAccountAsync(userDataRegistrationDto);
+                await _verifyService.SendOTP(result.email, result.id);
                 return Ok(new ApiResponse(true, data: result));
             }
             catch (ArgumentException ex)

@@ -8,6 +8,7 @@ namespace apief
         public string? encryptedSK { get; set; }
         public string? hashedRK { get; set; }
         public string? recoverySK { get; set; }
+        public bool isVerify { get; set; } = false;
 
     }
 }

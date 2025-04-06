@@ -48,8 +48,9 @@ namespace apief
                 .HasKey(a => a.additionalId);
 
             modelBuilder.Entity<UserData>()
-               .ToTable("UserData", "Dbo")
-               .HasKey(u => u.id);
+                .ToTable("UserData", "Dbo")
+                .HasKey(u => u.id);
+
         }
     }
 }

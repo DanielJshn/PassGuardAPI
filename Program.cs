@@ -71,6 +71,8 @@ builder.Services.AddScoped<IIdentityUser, IdentityUser>();
 builder.Services.AddScoped<IAuthHelp, AuthHelp>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IVerifyService, VerifyService>();
+builder.Services.AddScoped<IVerifyRepository, VerifyRepository>();
 
 builder.Services.AddScoped<IPassRepository, PassRepository>();
 builder.Services.AddScoped<IPassService, PassService>();

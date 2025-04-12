@@ -12,7 +12,7 @@ namespace apief
         }
 
         public DbSet<UserData> UserDatas { get; set; }
-
+        public DbSet<OTP> OTPs { get; set; }
         public DbSet<Password> Passwords { get; set; }
         public DbSet<AdditionalField> AdditionalFields { get; set; }
         public DbSet<Note> Notes { get; set; }
@@ -51,6 +51,9 @@ namespace apief
                 .ToTable("UserData", "Dbo")
                 .HasKey(u => u.id);
 
+            modelBuilder.Entity<OTP>()
+                .ToTable("OTP", "Dbo")
+                .HasKey(u => u.id);
         }
     }
 }

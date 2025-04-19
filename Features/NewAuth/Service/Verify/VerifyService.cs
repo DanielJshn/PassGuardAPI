@@ -1,3 +1,6 @@
+using System.Net;
+using System.Net.Mail;
+
 namespace apief
 {
     public class VerifyService : IVerifyService
@@ -10,12 +13,20 @@ namespace apief
 
         public async Task SendOTP(string email, Guid id)
         {
-            await SaveOTP(email, id);
-        }
-        
-        private async Task SaveOTP(string email, Guid id)
-        {
             var otp = CreateOTP();
+            await SaveOTP(email, id, otp);
+            await SendEmailAsync(email, otp);
+        }
+
+        private string CreateOTP()
+        {
+            var random = new Random();
+            int code = random.Next(0, 1000000);
+            return code.ToString("D6");
+        }
+
+        private async Task SaveOTP(string email, Guid id, string otp)
+        {
             var otpData = new OTP
             {
                 id = id,
@@ -26,13 +37,31 @@ namespace apief
             await _verifyRepository.AddOTP(otpData);
         }
 
-        private string CreateOTP()
+        private async Task SendEmailAsync(string email, string otp)
         {
-            var random = new Random();
-            int code = random.Next(0, 1000000);
-            string otpCode = code.ToString("D6");
+            var fromAddress = new MailAddress("danieldobosh361@gmail.com", " PassGuard");
+            var toAddress = new MailAddress(email);
+            const string fromPassword = "brzz wtej tobx hqol"; 
+            const string subject = "Your OTP Code";
+            string body = $"Your OTP code is: {otp}\nThis code will expire in 10 minutes.";
 
-            return otpCode;
+            var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 587,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            };
+
+            using var message = new MailMessage(fromAddress, toAddress)
+            {
+                Subject = subject,
+                Body = body
+            };
+
+            await smtp.SendMailAsync(message);
         }
 
     }

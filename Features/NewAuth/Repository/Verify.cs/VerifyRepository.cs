@@ -15,5 +15,12 @@ namespace apief
             await _dataContext.OTPs.AddAsync(otp);
             await _dataContext.SaveChangesAsync();
         }
+
+        public async Task<OTP?> GetOTPbyEmailAsync(string email)
+        {
+            return await _dataContext.OTPs.FirstOrDefaultAsync(u => u.email == email);
+        }
+
+        
     }
 }

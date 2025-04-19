@@ -16,11 +16,18 @@ namespace apief
             await _dataContext.UserDatas.AddAsync(userData);
             await _dataContext.SaveChangesAsync();
         }
-            
-    
+
+
         public async Task<UserData?> GetUserByEmailAsync(string email)
         {
             return await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.email == email);
+        }
+
+        public async Task UpdateIsVerify(UserData userData)
+        {
+            _dataContext.UserDatas.Update(userData);
+
+            await _dataContext.SaveChangesAsync();
         }
     }
 }

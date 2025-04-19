@@ -4,5 +4,6 @@ namespace apief
     {
          Task AddUserDataAsync(UserData user);
          Task<UserData?> GetUserByEmailAsync(string email);
+         Task UpdateIsVerify(UserData userData);
     }
 }

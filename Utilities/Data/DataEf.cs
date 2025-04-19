@@ -53,7 +53,7 @@ namespace apief
 
             modelBuilder.Entity<OTP>()
                 .ToTable("OTP", "Dbo")
-                .HasKey(u => u.id);
+                .HasKey(u => u.email);
         }
     }
 }

@@ -2,6 +2,7 @@ namespace apief
 {
     public interface IVerifyService
     {
-        Task SendOTP(string email, Guid id);
+        Task SendOTP(string email);
+        Task CheckOTP(OTPdto otp);
     }
 }

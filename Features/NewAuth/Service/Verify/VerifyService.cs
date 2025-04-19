@@ -1,22 +1,56 @@
 using System.Net;
 using System.Net.Mail;
+using AutoMapper;
 
 namespace apief
 {
     public class VerifyService : IVerifyService
     {
         private readonly IVerifyRepository _verifyRepository;
-        public VerifyService(IVerifyRepository verifyRepository)
+        private readonly IMapper _mapper;
+        private readonly IAuthRepository _authRepository;
+
+
+        public VerifyService(IVerifyRepository verifyRepository, IMapper mapper, IAuthRepository authRepository)
         {
             _verifyRepository = verifyRepository;
+            _mapper = mapper;
+            _authRepository = authRepository;
+
         }
 
-        public async Task SendOTP(string email, Guid id)
+        public async Task SendOTP(string email)
         {
             var otp = CreateOTP();
-            await SaveOTP(email, id, otp);
+            await SaveOTP(email, otp);
             await SendEmailAsync(email, otp);
         }
+
+
+        public async Task CheckOTP(OTPdto otp)
+        {
+            var otpFromEmail = _mapper.Map<OTP>(otp);
+            otpFromEmail.expirationDate = DateTime.UtcNow;
+
+            OTP otpFromDb = new OTP();
+
+            otpFromDb = await _verifyRepository.GetOTPbyEmailAsync(otp.email);
+            if (otpFromDb.otpCode != otp.otpCode)
+            {
+                throw new Exception();
+            }
+            if (otpFromDb.expirationDate < otpFromEmail.expirationDate)
+            {
+                throw new Exception();
+            }
+            UserData user = new UserData();
+            user = await _authRepository.GetUserByEmailAsync(otpFromEmail.email);
+            user.isVerify = true;
+            _authRepository.UpdateIsVerify(user);
+
+
+        }
+
 
         private string CreateOTP()
         {
@@ -25,11 +59,10 @@ namespace apief
             return code.ToString("D6");
         }
 
-        private async Task SaveOTP(string email, Guid id, string otp)
+        private async Task SaveOTP(string email, string otp)
         {
             var otpData = new OTP
             {
-                id = id,
                 email = email,
                 otpCode = otp,
                 expirationDate = DateTime.UtcNow.AddMinutes(10)
@@ -39,9 +72,9 @@ namespace apief
 
         private async Task SendEmailAsync(string email, string otp)
         {
-            var fromAddress = new MailAddress("danieldobosh361@gmail.com", " PassGuard");
+            var fromAddress = new MailAddress("@gmail.com", " PassGuard");
             var toAddress = new MailAddress(email);
-            const string fromPassword = "brzz wtej tobx hqol"; 
+            const string fromPassword = ""; //Todo add your pass
             const string subject = "Your OTP Code";
             string body = $"Your OTP code is: {otp}\nThis code will expire in 10 minutes.";
 

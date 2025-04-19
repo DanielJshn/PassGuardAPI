@@ -22,12 +22,27 @@ namespace apief
             try
             {
                 var result = await _authService.CreateNewAccountAsync(userDataRegistrationDto);
-                await _verifyService.SendOTP(result.email, result.id);
+                await _verifyService.SendOTP(result.email);
                 return Ok(new ApiResponse(true, data: result));
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(new ApiResponse(false, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(false, ex.Message));
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> CheckOTP(OTPdto otp)
+        {
+            try
+            {
+                await _verifyService.CheckOTP(otp);
+                return Ok(new ApiResponse(true, data: Ok()));
             }
             catch (Exception ex)
             {

@@ -1,9 +1,9 @@
 namespace apief
 {
-    public class OTP
+    public class OTPdto
     {
         public string? email { get; set; }
         public string? otpCode { get; set; }
-        public DateTime expirationDate { get; set; }
+        
     }
 }

@@ -26,30 +26,42 @@ namespace apief
             await SendEmailAsync(email, otp);
         }
 
+        public async Task ResendOTP(string email)
+        {
+            var otp = CreateOTP();
+            await UpdateOTP(email, otp);
+            await SendEmailAsync(email, otp);
+        }
 
         public async Task CheckOTP(OTPdto otp)
         {
-            var otpFromEmail = _mapper.Map<OTP>(otp);
-            otpFromEmail.expirationDate = DateTime.UtcNow;
+            var otpFromDb = await _verifyRepository.GetOTPbyEmailAsync(otp.email);
 
-            OTP otpFromDb = new OTP();
+            if (otpFromDb == null)
+            {
+                throw new Exception("OTP not found for the provided email.");
+            }
 
-            otpFromDb = await _verifyRepository.GetOTPbyEmailAsync(otp.email);
             if (otpFromDb.otpCode != otp.otpCode)
             {
-                throw new Exception();
+                throw new Exception("Invalid OTP code.");
             }
-            if (otpFromDb.expirationDate < otpFromEmail.expirationDate)
+
+            if (otpFromDb.expirationDate < DateTime.UtcNow)
             {
-                throw new Exception();
+                throw new Exception("OTP code has expired.");
             }
-            UserData user = new UserData();
-            user = await _authRepository.GetUserByEmailAsync(otpFromEmail.email);
+
+            var user = await _authRepository.GetUserByEmailAsync(otp.email);
+            if (user == null)
+            {
+                throw new Exception("User not found.");
+            }
+
             user.isVerify = true;
-            _authRepository.UpdateIsVerify(user);
-
-
+            await _authRepository.UpdateIsVerify(user);
         }
+
 
 
         private string CreateOTP()
@@ -69,6 +81,23 @@ namespace apief
             };
             await _verifyRepository.AddOTP(otpData);
         }
+
+        private async Task UpdateOTP(string email, string otp)
+        {
+            var existingOtp = await _verifyRepository.GetOTPbyEmailAsync(email);
+
+            if (existingOtp != null)
+            {
+                existingOtp.otpCode = otp;
+                existingOtp.expirationDate = DateTime.UtcNow.AddMinutes(10);
+                await _verifyRepository.UpdateOTP(existingOtp);
+            }
+            else
+            {
+                await SaveOTP(email, otp);
+            }
+        }
+
 
         private async Task SendEmailAsync(string email, string otp)
         {

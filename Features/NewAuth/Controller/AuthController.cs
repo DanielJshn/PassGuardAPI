@@ -50,5 +50,20 @@ namespace apief
             }
         }
 
+        [AllowAnonymous]
+        [HttpPut]
+        public async Task<IActionResult> ResendOTP(OTPresendDto otp)
+        {
+            try
+            {
+                await _verifyService.ResendOTP(otp.email);
+                return Ok(new ApiResponse(true, data: Ok()));
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(false, ex.Message));
+            }
+        }
     }
 }

@@ -4,5 +4,6 @@ namespace apief
     {
         Task AddOTP(OTP otp);
         Task<OTP?> GetOTPbyEmailAsync(string email);
+        Task UpdateOTP(OTP otp);
     }
 }

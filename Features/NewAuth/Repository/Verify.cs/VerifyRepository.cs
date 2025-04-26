@@ -9,7 +9,7 @@ namespace apief
         {
             _dataContext = dataContext;
         }
-        
+
         public async Task AddOTP(OTP otp)
         {
             await _dataContext.OTPs.AddAsync(otp);
@@ -21,6 +21,11 @@ namespace apief
             return await _dataContext.OTPs.FirstOrDefaultAsync(u => u.email == email);
         }
 
-        
+        public async Task UpdateOTP(OTP otp)
+        {
+            _dataContext.OTPs.Update(otp);
+            await _dataContext.SaveChangesAsync();
+        }
+
     }
 }

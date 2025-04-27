@@ -20,6 +20,8 @@ namespace apief
             CreateMap<BankAccount, BankAccountDto>().ReverseMap();
             CreateMap<BankAccount, BankAccountResponseDto>().ReverseMap();
             CreateMap<BankAccountDto, BankAccountResponseDto>().ReverseMap();
+
+            CreateMap<UserData, UserDataRegistrationDto>().ReverseMap();
             
         }
     }

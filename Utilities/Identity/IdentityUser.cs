@@ -14,7 +14,7 @@ namespace apief
         }
 
 
-        public async Task<User> GetUserByTokenAsync(ClaimsPrincipal userClaims)
+        public async Task<UserData> GetUserByTokenAsync(ClaimsPrincipal userClaims)
         {
             _logger.LogInfo("Attempting to extract email from token claims...");
             

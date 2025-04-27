@@ -4,6 +4,6 @@ namespace apief
 {
     public interface IIdentityUser
     {
-        Task<User> GetUserByTokenAsync(ClaimsPrincipal userClaims);
+        Task<UserData> GetUserByTokenAsync(ClaimsPrincipal userClaims);
     }
 }

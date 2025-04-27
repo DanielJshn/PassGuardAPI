@@ -24,6 +24,13 @@ namespace apief
             {
                 throw new ArgumentException(string.Join(" ", validationErrors));
             }
+            _log.LogInfo($"Checking if email {userDto.email} already exists...");
+            var existingUser = await _authRepository.GetUserByEmailAsync(userDto.email);
+            if (existingUser != null)
+            {
+                _log.LogWarning($"Attempt to create account with existing email: {userDto.email}");
+                throw new InvalidOperationException("An account with this email already exists.");
+            }
 
             var userModel = _mapper.Map<UserData>(userDto);
             userModel.id = Guid.NewGuid();

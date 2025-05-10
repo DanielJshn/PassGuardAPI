@@ -29,5 +29,17 @@ namespace apief
 
             await _dataContext.SaveChangesAsync();
         }
+
+        public async Task<string?> GetHashPKSaltAsync(string email)
+        {
+            var user = await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.email == email);
+            return user?.hashedPKSalt;
+        }
+
+        public async Task<string?> GetNonceAsync(string email)
+        {
+            var user = await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.email == email);
+            return user?.nonce;
+        }
     }
 }

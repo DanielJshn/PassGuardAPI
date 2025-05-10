@@ -51,6 +51,27 @@ namespace apief
             return userModel;
         }
 
+        public async Task<LoginStartResponseDto> StartLoginAsync(string email)
+        {
+            _log.LogInfo($"Starting login process for email: {email}");
+
+            var hashedPKSalt = await _authRepository.GetHashPKSaltAsync(email);
+            var nonce = await _authRepository.GetNonceAsync(email);
+
+            if (hashedPKSalt == null)
+            {
+                _log.LogWarning($"Failed to find user data for email: {email}");
+                throw new Exception("User not found or missing data.");
+            }
+
+            var loginStartResponseDto = new LoginStartResponseDto
+            {
+                hashedPKSalt = hashedPKSalt,
+                nonce = nonce
+            };
+
+            return loginStartResponseDto;
+        }
 
         private List<string> Validate(UserDataRegistrationDto userDto)
         {

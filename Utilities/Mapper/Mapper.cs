@@ -24,6 +24,8 @@ namespace apief
             CreateMap<UserData, UserDataRegistrationDto>().ReverseMap();
 
             CreateMap<OTP, OTPdto>().ReverseMap();
+            CreateMap<UserData, LoginStartResponseDto>().ReverseMap();
+            CreateMap<UserData, UserEmailDto>().ReverseMap();
             
         }
     }

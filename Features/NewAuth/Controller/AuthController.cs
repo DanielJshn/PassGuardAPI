@@ -65,5 +65,21 @@ namespace apief
                 return StatusCode(500, new ApiResponse(false, ex.Message));
             }
         }
+
+        [AllowAnonymous]
+        [HttpPost("loginStart")]
+        public async Task<IActionResult> LoginStart(UserEmailDto userEmailDto)
+        {
+            try
+            {
+                var result = await _authService.StartLoginAsync(userEmailDto.email);
+                return Ok(new ApiResponse(true, data: result));
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(false, ex.Message));
+            }
+        }
     }
 }

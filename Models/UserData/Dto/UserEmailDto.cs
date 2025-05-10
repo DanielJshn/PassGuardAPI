@@ -1,6 +1,6 @@
 namespace apief
 {
-    public class OTPresendDto
+    public class UserEmailDto
     {
         public string? email { get; set; }
     }

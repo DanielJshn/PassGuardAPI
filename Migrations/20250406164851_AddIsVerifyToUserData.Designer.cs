@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using apief;
 
@@ -11,9 +12,11 @@ using apief;
 namespace V2iSafe.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250406164851_AddIsVerifyToUserData")]
+    partial class AddIsVerifyToUserData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,22 +118,6 @@ namespace V2iSafe.Migrations
                     b.ToTable("Note", "Dbo");
                 });
 
-            modelBuilder.Entity("apief.OTP", b =>
-                {
-                    b.Property<string>("email")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("expirationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("otpCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("email");
-
-                    b.ToTable("OTP", "Dbo");
-                });
-
             modelBuilder.Entity("apief.Password", b =>
                 {
                     b.Property<Guid>("passwordId")
@@ -189,9 +176,6 @@ namespace V2iSafe.Migrations
 
                     b.Property<bool>("isVerify")
                         .HasColumnType("bit");
-
-                    b.Property<string>("nonce")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("recoverySK")
                         .HasColumnType("nvarchar(max)");

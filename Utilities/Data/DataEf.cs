@@ -12,7 +12,7 @@ namespace apief
         }
 
         public DbSet<UserData> UserDatas { get; set; }
-
+        public DbSet<OTP> OTPs { get; set; }
         public DbSet<Password> Passwords { get; set; }
         public DbSet<AdditionalField> AdditionalFields { get; set; }
         public DbSet<Note> Notes { get; set; }
@@ -48,8 +48,12 @@ namespace apief
                 .HasKey(a => a.additionalId);
 
             modelBuilder.Entity<UserData>()
-               .ToTable("UserData", "Dbo")
-               .HasKey(u => u.id);
+                .ToTable("UserData", "Dbo")
+                .HasKey(u => u.id);
+
+            modelBuilder.Entity<OTP>()
+                .ToTable("OTP", "Dbo")
+                .HasKey(u => u.email);
         }
     }
 }

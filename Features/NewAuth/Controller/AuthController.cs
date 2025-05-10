@@ -8,8 +8,10 @@ namespace apief
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly IVerifyService _verifyService;
+        public AuthController(IAuthService authService, IVerifyService verifyService)
         {
+            _verifyService = verifyService;
             _authService = authService;
         }
 
@@ -20,6 +22,7 @@ namespace apief
             try
             {
                 var result = await _authService.CreateNewAccountAsync(userDataRegistrationDto);
+                await _verifyService.SendOTP(result.email);
                 return Ok(new ApiResponse(true, data: result));
             }
             catch (ArgumentException ex)
@@ -32,5 +35,51 @@ namespace apief
             }
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> CheckOTP(OTPdto otp)
+        {
+            try
+            {
+                await _verifyService.CheckOTP(otp);
+                return Ok(new ApiResponse(true, data: Ok()));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(false, ex.Message));
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPut]
+        public async Task<IActionResult> ResendOTP(OTPresendDto otp)
+        {
+            try
+            {
+                await _verifyService.ResendOTP(otp.email);
+                return Ok(new ApiResponse(true, data: Ok()));
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(false, ex.Message));
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("loginStart")]
+        public async Task<IActionResult> LoginStart(UserEmailDto userEmailDto)
+        {
+            try
+            {
+                var result = await _authService.StartLoginAsync(userEmailDto.email);
+                return Ok(new ApiResponse(true, data: result));
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(false, ex.Message));
+            }
+        }
     }
 }

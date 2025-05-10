@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using apief;
 
@@ -11,9 +12,11 @@ using apief;
 namespace V2iSafe.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250412100209_AddOtpTable")]
+    partial class AddOtpTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,8 +120,12 @@ namespace V2iSafe.Migrations
 
             modelBuilder.Entity("apief.OTP", b =>
                 {
+                    b.Property<Guid>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("email")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("expirationDate")
                         .HasColumnType("datetime2");
@@ -126,7 +133,7 @@ namespace V2iSafe.Migrations
                     b.Property<string>("otpCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("email");
+                    b.HasKey("id");
 
                     b.ToTable("OTP", "Dbo");
                 });
@@ -189,9 +196,6 @@ namespace V2iSafe.Migrations
 
                     b.Property<bool>("isVerify")
                         .HasColumnType("bit");
-
-                    b.Property<string>("nonce")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("recoverySK")
                         .HasColumnType("nvarchar(max)");

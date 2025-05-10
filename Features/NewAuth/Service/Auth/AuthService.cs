@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 
@@ -80,6 +81,32 @@ namespace apief
             };
 
             return loginStartResponseDto;
+        }
+
+        public async Task<LoginFinishResponseDto> LoginFinishAsync(LoginFinishRequestDto loginFinishRequestDto)
+        {
+            await CombineAndHashAsync(loginFinishRequestDto.email);
+
+            var loginFinishResponseDto = new LoginFinishResponseDto();
+            return loginFinishResponseDto;
+            
+        }
+
+        public async Task<string> CombineAndHashAsync(string email)
+        {
+            var userLoginInfo = await _authRepository.GetUserByEmailAsync(email);
+            var hashedPkFromDb = userLoginInfo.hashedPK;
+            var nonceFromDb = userLoginInfo.nonce;
+
+            string combined = $"{hashedPkFromDb}:{nonceFromDb}";
+
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] combinedBytes = Encoding.UTF8.GetBytes(combined);
+                byte[] hashBytes = sha256.ComputeHash(combinedBytes);
+
+                return Convert.ToBase64String(hashBytes);
+            }
         }
 
         private List<string> Validate(UserDataRegistrationDto userDto)

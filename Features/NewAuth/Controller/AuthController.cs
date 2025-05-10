@@ -81,5 +81,21 @@ namespace apief
                 return StatusCode(500, new ApiResponse(false, ex.Message));
             }
         }
+
+        [AllowAnonymous]
+        [HttpPost("loginFinish")]
+        public async Task<IActionResult> LoginFinish(LoginFinishRequestDto loginFinishRequestDto)
+        {
+            try
+            {
+                var result = await _authService.LoginFinishAsync(loginFinishRequestDto);
+                return Ok(new ApiResponse(true, data: result));
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(false, ex.Message));
+            }
+        }
     }
 }

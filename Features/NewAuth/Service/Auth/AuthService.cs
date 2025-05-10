@@ -1,4 +1,6 @@
+using System.Security.Cryptography;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 
 namespace apief
 {
@@ -53,12 +55,19 @@ namespace apief
 
         public async Task<LoginStartResponseDto> StartLoginAsync(string email)
         {
+            var userLoginInfo = await _authRepository.GetUserByEmailAsync(email);
+            if (string.IsNullOrEmpty(userLoginInfo.email) || userLoginInfo.isVerify != true)
+            {
+                throw new UnauthorizedAccessException("User must complete OTP verification.");
+            }
+
             _log.LogInfo($"Starting login process for email: {email}");
 
-            var hashedPKSalt = await _authRepository.GetHashPKSaltAsync(email);
-            var nonce = await _authRepository.GetNonceAsync(email);
+            var hashedPKSaltFromDb = await _authRepository.GetHashPKSaltAsync(email);
+            var nonceGenerated = GenerateNonce(16);
+            await _authRepository.UpdateNonceAsync(nonceGenerated, email);
 
-            if (hashedPKSalt == null)
+            if (hashedPKSaltFromDb == null)
             {
                 _log.LogWarning($"Failed to find user data for email: {email}");
                 throw new Exception("User not found or missing data.");
@@ -66,8 +75,8 @@ namespace apief
 
             var loginStartResponseDto = new LoginStartResponseDto
             {
-                hashedPKSalt = hashedPKSalt,
-                nonce = nonce
+                hashedPKSalt = hashedPKSaltFromDb,
+                nonce = nonceGenerated
             };
 
             return loginStartResponseDto;
@@ -96,6 +105,16 @@ namespace apief
                 errors.Add("RecoverySK is required.");
 
             return errors;
+        }
+
+        private string GenerateNonce(int byteLength)
+        {
+            byte[] randomBytes = new byte[byteLength];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomBytes);
+            }
+            return Convert.ToBase64String(randomBytes);
         }
     }
 }

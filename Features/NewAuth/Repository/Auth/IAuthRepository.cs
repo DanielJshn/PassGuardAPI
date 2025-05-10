@@ -6,6 +6,6 @@ namespace apief
          Task<UserData?> GetUserByEmailAsync(string email);
          Task UpdateIsVerify(UserData userData);
          Task<string?> GetHashPKSaltAsync(string email);
-         Task<string?> GetNonceAsync(string email);
+         Task UpdateNonceAsync(string nonce, string email);
     }
 }

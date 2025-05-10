@@ -26,7 +26,6 @@ namespace apief
         public async Task UpdateIsVerify(UserData userData)
         {
             _dataContext.UserDatas.Update(userData);
-
             await _dataContext.SaveChangesAsync();
         }
 
@@ -36,10 +35,14 @@ namespace apief
             return user?.hashedPKSalt;
         }
 
-        public async Task<string?> GetNonceAsync(string email)
+        public async Task UpdateNonceAsync(string nonce, string email)
         {
-            var user = await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.email == email);
-            return user?.nonce;
+            var userData = await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.email == email);
+            if (userData != null)
+            {
+                userData.nonce = nonce;
+                await _dataContext.SaveChangesAsync();
+            }
         }
     }
 }

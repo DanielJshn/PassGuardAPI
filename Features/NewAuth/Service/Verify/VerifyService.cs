@@ -9,8 +9,6 @@ namespace apief
         private readonly IVerifyRepository _verifyRepository;
         private readonly IAuthRepository _authRepository;
         private readonly ILog _log;
-
-
         public VerifyService(IVerifyRepository verifyRepository, IAuthRepository authRepository, ILog log)
         {
             _verifyRepository = verifyRepository;
@@ -22,9 +20,7 @@ namespace apief
         public async Task SendOTP(string email)
         {
             _log.LogInfo($"Starting to send new OTP to email: {email}");
-
             var otp = CreateOTP();
-
             try
             {
                 _log.LogInfo("Saving new OTP to the database...");
@@ -45,9 +41,7 @@ namespace apief
         public async Task ResendOTP(string email)
         {
             _log.LogInfo($"Starting to resend OTP to email: {email}");
-
             var otp = CreateOTP();
-
             try
             {
                 _log.LogInfo("Updating OTP in the database...");
@@ -65,11 +59,9 @@ namespace apief
             }
         }
 
-
         public async Task CheckOTP(OTPdto otp)
         {
             var otpFromDb = await _verifyRepository.GetOTPbyEmailAsync(otp.email);
-
             if (otpFromDb == null)
             {
                 throw new Exception("OTP not found for the provided email.");
@@ -95,24 +87,19 @@ namespace apief
             await _authRepository.UpdateIsVerify(user);
         }
 
-
         private string CreateOTP()
         {
             _log.LogInfo("Starting OTP code generation...");
-
             var random = new Random();
             int code = random.Next(0, 1000000);
             string otp = code.ToString("D6");
-
             _log.LogInfo($"Generated OTP code: {otp}");
-
             return otp;
         }
 
         private async Task SaveOTP(string email, string otp)
         {
             _log.LogInfo($"Starting to save OTP for email: {email}");
-
             var otpData = new OTP
             {
                 email = email,
@@ -133,15 +120,12 @@ namespace apief
             }
         }
 
-
         private async Task UpdateOTP(string email, string otp)
         {
             _log.LogInfo($"Starting to update OTP for email: {email}");
-
             try
             {
                 var existingOtp = await _verifyRepository.GetOTPbyEmailAsync(email);
-
                 if (existingOtp != null)
                 {
                     _log.LogInfo($"Existing OTP found for email: {email}. Updating OTP and expiration date.");
@@ -169,13 +153,11 @@ namespace apief
         private async Task SendEmailAsync(string email, string otp)
         {
             _log.LogInfo($"Starting to send OTP email to: {email}");
-
             var fromAddress = new MailAddress("@gmail.com", "PassGuard");
             var toAddress = new MailAddress(email);
             const string fromPassword = ""; // TODO: Add your password
             const string subject = "Your OTP Code";
             string body = $"Your OTP code is: {otp}\nThis code will expire in 10 minutes.";
-
             var smtp = new SmtpClient
             {
                 Host = "smtp.gmail.com",
@@ -195,7 +177,6 @@ namespace apief
                 };
 
                 await smtp.SendMailAsync(message);
-
                 _log.LogInfo($"OTP email successfully sent to: {email}");
             }
             catch (Exception ex)

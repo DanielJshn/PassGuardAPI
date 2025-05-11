@@ -29,7 +29,6 @@ namespace apief
             return value;
         }
 
-
         public async Task SetAsync<T>(string key, T value, TimeSpan expiration)
         {
             var jsonData = JsonSerializer.Serialize(value);
@@ -47,5 +46,4 @@ namespace apief
             await _cacheDb.KeyDeleteAsync(key);
         }
     }
-
 }

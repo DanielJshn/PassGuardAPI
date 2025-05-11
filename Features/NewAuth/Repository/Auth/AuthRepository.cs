@@ -5,7 +5,6 @@ namespace apief
     public class AuthRepository : IAuthRepository
     {
         private readonly DataContext _dataContext;
-
         public AuthRepository(DataContext dataContext)
         {
             _dataContext = dataContext;
@@ -16,7 +15,6 @@ namespace apief
             await _dataContext.UserDatas.AddAsync(userData);
             await _dataContext.SaveChangesAsync();
         }
-
 
         public async Task<UserData?> GetUserByEmailAsync(string email)
         {

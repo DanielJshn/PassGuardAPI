@@ -10,7 +10,6 @@ namespace apief
         private readonly ILog _log;
         private readonly IAuthRepository _authRepository;
         private readonly IMapper _mapper;
-
         public AuthService(IAuthRepository authRepository, IMapper mapper, ILog log)
         {
             _authRepository = authRepository;
@@ -21,12 +20,12 @@ namespace apief
         public async Task<UserData> CreateNewAccountAsync(UserDataRegistrationDto userDto)
         {
             _log.LogInfo("Starting user account creation...");
-
             var validationErrors = Validate(userDto);
             if (validationErrors.Any())
             {
                 throw new ArgumentException(string.Join(" ", validationErrors));
             }
+
             _log.LogInfo($"Checking if email {userDto.email} already exists...");
             var existingUser = await _authRepository.GetUserByEmailAsync(userDto.email);
             if (existingUser != null)
@@ -37,7 +36,6 @@ namespace apief
 
             var userModel = _mapper.Map<UserData>(userDto);
             userModel.id = Guid.NewGuid();
-
             _log.LogInfo($"Generated new user ID: {userModel.id}");
             try
             {
@@ -63,11 +61,9 @@ namespace apief
             }
 
             _log.LogInfo($"Starting login process for email: {email}");
-
             var hashedPKSaltFromDb = await _authRepository.GetHashPKSaltAsync(email);
             var nonceGenerated = GenerateNonce(16);
             await _authRepository.UpdateNonceAsync(nonceGenerated, email);
-
             if (hashedPKSaltFromDb == null)
             {
                 _log.LogWarning($"Failed to find user data for email: {email}");
@@ -85,21 +81,17 @@ namespace apief
 
         public async Task<LoginFinishResponseDto> LoginFinishAsync(LoginFinishRequestDto loginFinishRequestDto)
         {
-            await CombineAndHashAsync(loginFinishRequestDto.email);
-
+            var result = await CombineAndHashAsync(loginFinishRequestDto.email);
             var loginFinishResponseDto = new LoginFinishResponseDto();
             return loginFinishResponseDto;
-            
         }
 
-        public async Task<string> CombineAndHashAsync(string email)
+        private async Task<string> CombineAndHashAsync(string email)
         {
             var userLoginInfo = await _authRepository.GetUserByEmailAsync(email);
             var hashedPkFromDb = userLoginInfo.hashedPK;
             var nonceFromDb = userLoginInfo.nonce;
-
             string combined = $"{hashedPkFromDb}:{nonceFromDb}";
-
             using (var sha256 = SHA256.Create())
             {
                 byte[] combinedBytes = Encoding.UTF8.GetBytes(combined);
@@ -141,6 +133,7 @@ namespace apief
             {
                 rng.GetBytes(randomBytes);
             }
+
             return Convert.ToBase64String(randomBytes);
         }
     }

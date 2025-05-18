@@ -36,7 +36,7 @@ namespace apief
         }
 
         [AllowAnonymous]
-        [HttpPost]
+        [HttpPost("checkOTP")]
         public async Task<IActionResult> CheckOTP(OTPdto otp)
         {
             try
@@ -51,14 +51,13 @@ namespace apief
         }
 
         [AllowAnonymous]
-        [HttpPut]
+        [HttpPut("resendOTP")]
         public async Task<IActionResult> ResendOTP(OTPresendDto otp)
         {
             try
             {
                 await _verifyService.ResendOTP(otp.email);
                 return Ok(new ApiResponse(true, data: Ok()));
-
             }
             catch (Exception ex)
             {
@@ -74,7 +73,6 @@ namespace apief
             {
                 var result = await _authService.StartLoginAsync(userEmailDto.email);
                 return Ok(new ApiResponse(true, data: result));
-
             }
             catch (Exception ex)
             {
@@ -90,7 +88,6 @@ namespace apief
             {
                 var result = await _authService.LoginFinishAsync(loginFinishRequestDto);
                 return Ok(new ApiResponse(true, data: result));
-
             }
             catch (Exception ex)
             {

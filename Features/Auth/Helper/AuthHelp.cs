@@ -19,25 +19,6 @@ namespace testProd.auth
             _config = config;
         }
 
-        public string GetPasswordHash(string password, string salt)
-        {
-            if (string.IsNullOrEmpty(salt))
-                throw new ArgumentException("Salt is required.");
-
-            byte[] saltBytes = Convert.FromBase64String(salt); // если соль присылается в base64
-            byte[] passwordHash = KeyDerivation.Pbkdf2(
-                password: password,
-                salt: saltBytes,
-                prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 1000000,
-                numBytesRequested: 256 / 8
-            );
-
-            return Convert.ToBase64String(passwordHash);
-        }
-
-
-
         public string GenerateNewToken(string userEmail)
         {
 
@@ -47,17 +28,13 @@ namespace testProd.auth
             };
 
             string? tokenKeyString = _config.GetSection(KEY_TOKEN_KEY).Value;
-
             if (string.IsNullOrEmpty(tokenKeyString))
             {
                 throw new ArgumentException("TokenKey is not configured.");
             }
 
-
             SymmetricSecurityKey tokenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKeyString));
             SigningCredentials credentials = new SigningCredentials(tokenKey, SecurityAlgorithms.HmacSha256Signature);
-
-
             SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
@@ -69,7 +46,6 @@ namespace testProd.auth
 
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             SecurityToken token = handler.CreateToken(descriptor);
-
             return handler.WriteToken(token);
         }
     }

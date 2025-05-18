@@ -2,12 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace apief
 {
-    public class LoginFinishResponseDto
+    public class LoginFinishRequestDto
     {
-        public Guid? id { get; set; }
-        public string? accesToken { get; set; }
-        public string? refreshToken { get; set; }
-        public string? encryptedSK { get; set; }
-        public string? token {get; set;}
+        public string? email { get; set; }
+        public string? hashedPK { get; set; }
     }
 }

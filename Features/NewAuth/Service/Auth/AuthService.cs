@@ -90,7 +90,9 @@ namespace apief
             string token = _authHelp.GenerateNewToken(email);
             var response = new LoginFinishResponseDto
             {
-                token = token
+                accesToken = token,
+                id = user.id,
+                encryptedSK = user.encryptedSK
             };
 
             return response;

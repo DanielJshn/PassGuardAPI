@@ -10,11 +10,13 @@ namespace apief
         private readonly ILog _log;
         private readonly IAuthRepository _authRepository;
         private readonly IMapper _mapper;
-        public AuthService(IAuthRepository authRepository, IMapper mapper, ILog log)
+        private readonly IAuthHelp _authHelp;
+        public AuthService(IAuthRepository authRepository, IMapper mapper, ILog log, IAuthHelp help)
         {
             _authRepository = authRepository;
             _mapper = mapper;
             _log = log;
+            _authHelp = help;
         }
 
         public async Task<UserData> CreateNewAccountAsync(UserDataRegistrationDto userDto)
@@ -81,24 +83,28 @@ namespace apief
 
         public async Task<LoginFinishResponseDto> LoginFinishAsync(LoginFinishRequestDto loginFinishRequestDto)
         {
-            var result = await CombineAndHashAsync(loginFinishRequestDto.email);
-            var loginFinishResponseDto = new LoginFinishResponseDto();
-            return loginFinishResponseDto;
+            var email = loginFinishRequestDto.email;
+            var hashedClient = loginFinishRequestDto.hashedPK;
+            var user = await _authRepository.GetUserByEmailAsync(email);
+            string serverHash = CombineAndHashAsync(user.hashedPK, user.nonce);
+            string token = _authHelp.GenerateNewToken(email);
+            var response = new LoginFinishResponseDto
+            {
+                token = token
+            };
+
+            return response;
         }
 
-        private async Task<string> CombineAndHashAsync(string email)
+        private string CombineAndHashAsync(string hashedPK, string nonce)
         {
-            var userLoginInfo = await _authRepository.GetUserByEmailAsync(email);
-            var hashedPkFromDb = userLoginInfo.hashedPK;
-            var nonceFromDb = userLoginInfo.nonce;
-            string combined = $"{hashedPkFromDb}:{nonceFromDb}";
-            using (var sha256 = SHA256.Create())
-            {
-                byte[] combinedBytes = Encoding.UTF8.GetBytes(combined);
-                byte[] hashBytes = sha256.ComputeHash(combinedBytes);
+            string combined = $"{hashedPK}:{nonce}";
 
-                return Convert.ToBase64String(hashBytes);
-            }
+            using var sha256 = SHA256.Create();
+            byte[] combinedBytes = Encoding.UTF8.GetBytes(combined);
+            byte[] hashBytes = sha256.ComputeHash(combinedBytes);
+
+            return Convert.ToBase64String(hashBytes);
         }
 
         private List<string> Validate(UserDataRegistrationDto userDto)

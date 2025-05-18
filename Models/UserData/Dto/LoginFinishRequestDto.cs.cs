@@ -8,5 +8,6 @@ namespace apief
         public string? accesToken { get; set; }
         public string? refreshToken { get; set; }
         public string? encryptedSK { get; set; }
+        public string? token {get; set;}
     }
 }

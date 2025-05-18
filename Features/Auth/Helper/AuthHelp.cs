@@ -19,32 +19,28 @@ namespace testProd.auth
             _config = config;
         }
 
-        public string GetPasswordHash(string password)
+        public string GetPasswordHash(string password, string salt)
         {
-            string? passwordKeyString = _config.GetSection(KEY_PASSWORD_KEY).Value;
-            if (string.IsNullOrEmpty(passwordKeyString))
-            {
-                throw new ArgumentException("PasswordKey is not configured.");
-            }
+            if (string.IsNullOrEmpty(salt))
+                throw new ArgumentException("Salt is required.");
 
-            byte[] passwordKey = Encoding.ASCII.GetBytes(passwordKeyString);
-
+            byte[] saltBytes = Convert.FromBase64String(salt); // если соль присылается в base64
             byte[] passwordHash = KeyDerivation.Pbkdf2(
                 password: password,
-                salt: passwordKey,
+                salt: saltBytes,
                 prf: KeyDerivationPrf.HMACSHA256,
                 iterationCount: 1000000,
                 numBytesRequested: 256 / 8
             );
-            string passwordHashBase64 = Convert.ToBase64String(passwordHash);
 
-            return passwordHashBase64;
+            return Convert.ToBase64String(passwordHash);
         }
-        
+
+
 
         public string GenerateNewToken(string userEmail)
         {
-            
+
             Claim[] claims = new Claim[]
             {
                 new Claim("email", userEmail)
@@ -57,16 +53,16 @@ namespace testProd.auth
                 throw new ArgumentException("TokenKey is not configured.");
             }
 
-           
+
             SymmetricSecurityKey tokenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKeyString));
             SigningCredentials credentials = new SigningCredentials(tokenKey, SecurityAlgorithms.HmacSha256Signature);
 
-            
+
             SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
                 SigningCredentials = credentials,
-                Expires = DateTime.Now.AddMonths(TOKEN_EXPIRATION_MONTHS), 
+                Expires = DateTime.Now.AddMonths(TOKEN_EXPIRATION_MONTHS),
                 Issuer = _config["JwtSettings:ValidIssuer"],
                 Audience = _config["JwtSettings:ValidAudience"]
             };

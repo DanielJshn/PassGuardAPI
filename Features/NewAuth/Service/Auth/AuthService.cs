@@ -84,9 +84,12 @@ namespace apief
         public async Task<LoginFinishResponseDto> LoginFinishAsync(LoginFinishRequestDto loginFinishRequestDto)
         {
             var email = loginFinishRequestDto.email;
-            var hashedClient = loginFinishRequestDto.hashedPK;
+            var clientHash = loginFinishRequestDto.hashedPK;
             var user = await _authRepository.GetUserByEmailAsync(email);
-            string serverHash = CombineAndHashAsync(user.hashedPK, user.nonce);
+
+            string serverHash = CombineAndHash(user.hashedPK, user.nonce);
+            // to do : check if serverHash == clientHash
+
             string token = _authHelp.GenerateNewToken(email);
             var response = new LoginFinishResponseDto
             {
@@ -98,7 +101,7 @@ namespace apief
             return response;
         }
 
-        private string CombineAndHashAsync(string hashedPK, string nonce)
+        private string CombineAndHash(string hashedPK, string nonce)
         {
             string combined = $"{hashedPK}:{nonce}";
 

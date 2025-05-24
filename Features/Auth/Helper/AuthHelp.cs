@@ -39,7 +39,7 @@ namespace testProd.auth
             {
                 Subject = new ClaimsIdentity(claims),
                 SigningCredentials = credentials,
-                Expires = DateTime.Now.AddMonths(TOKEN_EXPIRATION_MONTHS),
+                Expires = DateTime.UtcNow.AddMonths(TOKEN_EXPIRATION_MONTHS),
                 Issuer = _config["JwtSettings:ValidIssuer"],
                 Audience = _config["JwtSettings:ValidAudience"]
             };

@@ -1,7 +1,8 @@
 namespace apief
 {
-    public interface IAuthHelp 
+    public interface IAuthHelp
     {
         public string GenerateNewToken(string userEmail);
+        public string GenerateRefreshToken();
     }
 }

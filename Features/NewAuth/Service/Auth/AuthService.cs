@@ -88,17 +88,53 @@ namespace apief
             var user = await _authRepository.GetUserByEmailAsync(email);
 
             string serverHash = CombineAndHash(user.hashedPK, user.nonce);
-            // to do : check if serverHash == clientHash
+            // if (clientHash != serverHash)
+            //     throw new UnauthorizedAccessException("Invalid hash");
 
-            string token = _authHelp.GenerateNewToken(email);
-            var response = new LoginFinishResponseDto
+            string accessToken = _authHelp.GenerateNewToken(email);
+            string refreshToken = _authHelp.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
+            await _authRepository.UpdateUserAsync(user);
+
+            return new LoginFinishResponseDto
             {
-                accesToken = token,
+                accesToken = accessToken,
+                refreshToken = refreshToken,
                 id = user.id,
                 encryptedSK = user.encryptedSK
             };
+        }
 
-            return response;
+        public async Task<RefreshTokenResponseDto> RefreshTokenAsync(string clientRefreshToken, string email)
+        {
+            if (string.IsNullOrEmpty(clientRefreshToken))
+                throw new ArgumentException("Refresh token is required", nameof(clientRefreshToken));
+
+            var user = await _authRepository.GetUserByEmailAsync(email);
+            if (user == null)
+                throw new UnauthorizedAccessException("User not found");
+
+            if (user.RefreshToken != clientRefreshToken)
+                throw new UnauthorizedAccessException("Invalid refresh token");
+
+            if (user.RefreshTokenExpiration < DateTime.UtcNow)
+                throw new UnauthorizedAccessException("Refresh token expired");
+
+            string newAccessToken = _authHelp.GenerateNewToken(user.email);
+            string newRefreshToken = _authHelp.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
+            // TODO: move token expiration time to appsettings
+            await _authRepository.UpdateUserAsync(user);
+
+            return new RefreshTokenResponseDto
+            {
+                accessToken = newAccessToken,
+                refreshToken = newRefreshToken
+            };
         }
 
         private string CombineAndHash(string hashedPK, string nonce)

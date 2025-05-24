@@ -42,5 +42,20 @@ namespace apief
                 await _dataContext.SaveChangesAsync();
             }
         }
+
+        public async Task UpdateUserAsync(UserData user)
+        {
+            var existingUser = await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.id == user.id);
+            if (existingUser == null)
+            {
+                throw new Exception("User not found");
+            }
+            
+            existingUser.RefreshToken = user.RefreshToken;
+            existingUser.RefreshTokenExpiration = user.RefreshTokenExpiration;
+
+            await _dataContext.SaveChangesAsync();
+        }
+
     }
 }

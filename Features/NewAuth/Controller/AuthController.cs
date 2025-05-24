@@ -94,5 +94,20 @@ namespace apief
                 return StatusCode(500, new ApiResponse(false, ex.Message));
             }
         }
+
+        [AllowAnonymous]
+        [HttpPut("refresh-token")]
+        public async Task<IActionResult> Refreshtoken(RefreshTokenRequestDto refreshTokenRequestDto)
+        {
+            try
+            {
+                var result = await _authService.RefreshTokenAsync(refreshTokenRequestDto.refreshToken, refreshTokenRequestDto.email);
+                return Ok(new ApiResponse(true, data: result));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(false, ex.Message));
+            }
+        }
     }
 }

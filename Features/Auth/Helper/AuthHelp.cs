@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using apief;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
@@ -10,7 +11,7 @@ namespace testProd.auth
     public class AuthHelp : IAuthHelp
     {
         private readonly IConfiguration _config;
-        private const int TOKEN_EXPIRATION_MONTHS = 1;
+        private const int TOKEN_EXPIRATION_HOURS = 24;
         private const string KEY_PASSWORD_KEY = "AppSettings:PasswordKey";
         public static string KEY_TOKEN_KEY = "JwtSettings:TokenKey";
 
@@ -39,7 +40,7 @@ namespace testProd.auth
             {
                 Subject = new ClaimsIdentity(claims),
                 SigningCredentials = credentials,
-                Expires = DateTime.UtcNow.AddMonths(TOKEN_EXPIRATION_MONTHS),
+                Expires = DateTime.UtcNow.AddHours(TOKEN_EXPIRATION_HOURS),
                 Issuer = _config["JwtSettings:ValidIssuer"],
                 Audience = _config["JwtSettings:ValidAudience"]
             };
@@ -47,6 +48,14 @@ namespace testProd.auth
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             SecurityToken token = handler.CreateToken(descriptor);
             return handler.WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
         }
     }
 }

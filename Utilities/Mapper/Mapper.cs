@@ -28,6 +28,8 @@ namespace apief
             CreateMap<UserData, UserEmailDto>().ReverseMap();
             CreateMap<UserData, LoginFinishRequestDto>().ReverseMap();
             CreateMap<UserData, LoginFinishResponseDto>().ReverseMap();
+            CreateMap<UserData, RefreshTokenRequestDto>().ReverseMap();
+            CreateMap<UserData, RefreshTokenResponseDto>().ReverseMap();
             
         }
     }

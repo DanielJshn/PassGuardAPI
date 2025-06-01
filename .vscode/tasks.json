@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "dotnet",
+			"task": "build",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "dotnet: build"
+		},
+		{
+			"type": "dotnet",
+			"task": "watch V2iSafe",
+			"file": "C:\\Users\\danie\\Desktop\\V2iSafe\\V2iSafe.csproj",
+			"problemMatcher": [],
+			"label": "dotnet: watch V2iSafe"
+		}
+	]
+}

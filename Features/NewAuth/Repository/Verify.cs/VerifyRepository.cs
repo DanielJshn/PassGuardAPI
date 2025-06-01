@@ -26,6 +26,5 @@ namespace apief
             _dataContext.OTPs.Update(otp);
             await _dataContext.SaveChangesAsync();
         }
-
     }
 }

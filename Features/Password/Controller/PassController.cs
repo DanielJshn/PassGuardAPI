@@ -11,13 +11,11 @@ namespace apief
 
         private readonly IPassService _passwordService;
         private readonly IIdentityUser _identity;
-
         public PassController(IPassService passwordService, IIdentityUser identity)
         {
             _passwordService = passwordService;
             _identity = identity;
         }
-
 
         [HttpPost]
         public async Task<ActionResult<PasswordDto>> PostPassword([FromBody] PasswordDto password)
@@ -39,7 +37,6 @@ namespace apief
             }
         }
 
-
         [HttpGet]
         public async Task<IActionResult> GetPasswords()
         {
@@ -55,7 +52,6 @@ namespace apief
             }
         }
 
-
         [HttpPut("{passwordId}")] //to query
         public async Task<IActionResult> UpdatePassword(Guid passwordId, [FromBody] PasswordForUpdateDto dataInput)
         {
@@ -70,7 +66,6 @@ namespace apief
                 return BadRequest(new ApiResponse(success: false, message: ex.Message));
             }
         }
-
 
         [HttpDelete("{passwordId}")]
         public async Task<IActionResult> DeletePassword(Guid passwordId)

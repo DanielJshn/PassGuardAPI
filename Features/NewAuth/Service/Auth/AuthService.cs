@@ -1,4 +1,7 @@
+using System.Security.Cryptography;
+using System.Text;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 
 namespace apief
 {
@@ -7,23 +10,24 @@ namespace apief
         private readonly ILog _log;
         private readonly IAuthRepository _authRepository;
         private readonly IMapper _mapper;
-
-        public AuthService(IAuthRepository authRepository, IMapper mapper, ILog log)
+        private readonly IAuthHelp _authHelp;
+        public AuthService(IAuthRepository authRepository, IMapper mapper, ILog log, IAuthHelp help)
         {
             _authRepository = authRepository;
             _mapper = mapper;
             _log = log;
+            _authHelp = help;
         }
 
         public async Task<UserData> CreateNewAccountAsync(UserDataRegistrationDto userDto)
         {
             _log.LogInfo("Starting user account creation...");
-
             var validationErrors = Validate(userDto);
             if (validationErrors.Any())
             {
                 throw new ArgumentException(string.Join(" ", validationErrors));
             }
+
             _log.LogInfo($"Checking if email {userDto.email} already exists...");
             var existingUser = await _authRepository.GetUserByEmailAsync(userDto.email);
             if (existingUser != null)
@@ -34,7 +38,6 @@ namespace apief
 
             var userModel = _mapper.Map<UserData>(userDto);
             userModel.id = Guid.NewGuid();
-
             _log.LogInfo($"Generated new user ID: {userModel.id}");
             try
             {
@@ -53,12 +56,17 @@ namespace apief
 
         public async Task<LoginStartResponseDto> StartLoginAsync(string email)
         {
+            var userLoginInfo = await _authRepository.GetUserByEmailAsync(email);
+            if (string.IsNullOrEmpty(userLoginInfo.email) || userLoginInfo.isVerify != true)
+            {
+                throw new UnauthorizedAccessException("User must complete OTP verification.");
+            }
+
             _log.LogInfo($"Starting login process for email: {email}");
-
-            var hashedPKSalt = await _authRepository.GetHashPKSaltAsync(email);
-            var nonce = await _authRepository.GetNonceAsync(email);
-
-            if (hashedPKSalt == null)
+            var hashedPKSaltFromDb = await _authRepository.GetHashPKSaltAsync(email);
+            var nonceGenerated = GenerateNonce(16);
+            await _authRepository.UpdateNonceAsync(nonceGenerated, email);
+            if (hashedPKSaltFromDb == null)
             {
                 _log.LogWarning($"Failed to find user data for email: {email}");
                 throw new Exception("User not found or missing data.");
@@ -66,11 +74,78 @@ namespace apief
 
             var loginStartResponseDto = new LoginStartResponseDto
             {
-                hashedPKSalt = hashedPKSalt,
-                nonce = nonce
+                hashedPKSalt = hashedPKSaltFromDb,
+                nonce = nonceGenerated
             };
 
             return loginStartResponseDto;
+        }
+
+        public async Task<LoginFinishResponseDto> LoginFinishAsync(LoginFinishRequestDto loginFinishRequestDto)
+        {
+            var email = loginFinishRequestDto.email;
+            var clientHash = loginFinishRequestDto.hashedPK;
+            var user = await _authRepository.GetUserByEmailAsync(email);
+
+            string serverHash = CombineAndHash(user.hashedPK, user.nonce);
+            // if (clientHash != serverHash)
+            //     throw new UnauthorizedAccessException("Invalid hash");
+
+            string accessToken = _authHelp.GenerateNewToken(email);
+            string refreshToken = _authHelp.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
+            await _authRepository.UpdateUserAsync(user);
+
+            return new LoginFinishResponseDto
+            {
+                accesToken = accessToken,
+                refreshToken = refreshToken,
+                id = user.id,
+                encryptedSK = user.encryptedSK
+            };
+        }
+
+        public async Task<RefreshTokenResponseDto> RefreshTokenAsync(string clientRefreshToken, string email)
+        {
+            if (string.IsNullOrEmpty(clientRefreshToken))
+                throw new ArgumentException("Refresh token is required", nameof(clientRefreshToken));
+
+            var user = await _authRepository.GetUserByEmailAsync(email);
+            if (user == null)
+                throw new UnauthorizedAccessException("User not found");
+
+            if (user.RefreshToken != clientRefreshToken)
+                throw new UnauthorizedAccessException("Invalid refresh token");
+
+            if (user.RefreshTokenExpiration < DateTime.UtcNow)
+                throw new UnauthorizedAccessException("Refresh token expired");
+
+            string newAccessToken = _authHelp.GenerateNewToken(user.email);
+            string newRefreshToken = _authHelp.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiration = DateTime.UtcNow.AddDays(7);
+            // TODO: move token expiration time to appsettings
+            await _authRepository.UpdateUserAsync(user);
+
+            return new RefreshTokenResponseDto
+            {
+                accessToken = newAccessToken,
+                refreshToken = newRefreshToken
+            };
+        }
+
+        private string CombineAndHash(string hashedPK, string nonce)
+        {
+            string combined = $"{hashedPK}:{nonce}";
+
+            using var sha256 = SHA256.Create();
+            byte[] combinedBytes = Encoding.UTF8.GetBytes(combined);
+            byte[] hashBytes = sha256.ComputeHash(combinedBytes);
+
+            return Convert.ToBase64String(hashBytes);
         }
 
         private List<string> Validate(UserDataRegistrationDto userDto)
@@ -96,6 +171,17 @@ namespace apief
                 errors.Add("RecoverySK is required.");
 
             return errors;
+        }
+
+        private string GenerateNonce(int byteLength)
+        {
+            byte[] randomBytes = new byte[byteLength];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomBytes);
+            }
+
+            return Convert.ToBase64String(randomBytes);
         }
     }
 }

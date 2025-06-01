@@ -5,7 +5,6 @@ namespace apief
     public class AuthRepository : IAuthRepository
     {
         private readonly DataContext _dataContext;
-
         public AuthRepository(DataContext dataContext)
         {
             _dataContext = dataContext;
@@ -17,7 +16,6 @@ namespace apief
             await _dataContext.SaveChangesAsync();
         }
 
-
         public async Task<UserData?> GetUserByEmailAsync(string email)
         {
             return await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.email == email);
@@ -26,7 +24,6 @@ namespace apief
         public async Task UpdateIsVerify(UserData userData)
         {
             _dataContext.UserDatas.Update(userData);
-
             await _dataContext.SaveChangesAsync();
         }
 
@@ -36,10 +33,29 @@ namespace apief
             return user?.hashedPKSalt;
         }
 
-        public async Task<string?> GetNonceAsync(string email)
+        public async Task UpdateNonceAsync(string nonce, string email)
         {
-            var user = await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.email == email);
-            return user?.nonce;
+            var userData = await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.email == email);
+            if (userData != null)
+            {
+                userData.nonce = nonce;
+                await _dataContext.SaveChangesAsync();
+            }
         }
+
+        public async Task UpdateUserAsync(UserData user)
+        {
+            var existingUser = await _dataContext.UserDatas.FirstOrDefaultAsync(u => u.id == user.id);
+            if (existingUser == null)
+            {
+                throw new Exception("User not found");
+            }
+            
+            existingUser.RefreshToken = user.RefreshToken;
+            existingUser.RefreshTokenExpiration = user.RefreshTokenExpiration;
+
+            await _dataContext.SaveChangesAsync();
+        }
+
     }
 }

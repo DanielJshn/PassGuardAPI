@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using apief;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
@@ -10,7 +11,7 @@ namespace testProd.auth
     public class AuthHelp : IAuthHelp
     {
         private readonly IConfiguration _config;
-        private const int TOKEN_EXPIRATION_MONTHS = 1;
+        private const int TOKEN_EXPIRATION_HOURS = 24;
         private const string KEY_PASSWORD_KEY = "AppSettings:PasswordKey";
         public static string KEY_TOKEN_KEY = "JwtSettings:TokenKey";
 
@@ -19,62 +20,42 @@ namespace testProd.auth
             _config = config;
         }
 
-        public string GetPasswordHash(string password)
-        {
-            string? passwordKeyString = _config.GetSection(KEY_PASSWORD_KEY).Value;
-            if (string.IsNullOrEmpty(passwordKeyString))
-            {
-                throw new ArgumentException("PasswordKey is not configured.");
-            }
-
-            byte[] passwordKey = Encoding.ASCII.GetBytes(passwordKeyString);
-
-            byte[] passwordHash = KeyDerivation.Pbkdf2(
-                password: password,
-                salt: passwordKey,
-                prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 1000000,
-                numBytesRequested: 256 / 8
-            );
-            string passwordHashBase64 = Convert.ToBase64String(passwordHash);
-
-            return passwordHashBase64;
-        }
-        
-
         public string GenerateNewToken(string userEmail)
         {
-            
+
             Claim[] claims = new Claim[]
             {
                 new Claim("email", userEmail)
             };
 
             string? tokenKeyString = _config.GetSection(KEY_TOKEN_KEY).Value;
-
             if (string.IsNullOrEmpty(tokenKeyString))
             {
                 throw new ArgumentException("TokenKey is not configured.");
             }
 
-           
             SymmetricSecurityKey tokenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKeyString));
             SigningCredentials credentials = new SigningCredentials(tokenKey, SecurityAlgorithms.HmacSha256Signature);
-
-            
             SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
                 SigningCredentials = credentials,
-                Expires = DateTime.Now.AddMonths(TOKEN_EXPIRATION_MONTHS), 
+                Expires = DateTime.UtcNow.AddHours(TOKEN_EXPIRATION_HOURS),
                 Issuer = _config["JwtSettings:ValidIssuer"],
                 Audience = _config["JwtSettings:ValidAudience"]
             };
 
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             SecurityToken token = handler.CreateToken(descriptor);
-
             return handler.WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
         }
     }
 }
